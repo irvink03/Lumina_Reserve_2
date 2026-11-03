@@ -1,0 +1,168 @@
+@model IEnumerable<Lumina_Reserve_2.Models.Cita>
+@{
+    ViewData["Title"] = "Dashboard Admin";
+    int sucursalActual = ViewBag.SucursalActual ?? 1;
+}
+
+<div class="container-fluid py-4">
+    <!-- ENCABEZADO -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <h1 class="h3 text-white fw-bold mb-1">DASHBOARD ADMIN</h1>
+            <p class="text-white-50 m-0">Resumen financiero y operativo de Lumina Reserve.</p>
+        </div>
+        <div class="text-end">
+            <div class="text-warning fw-bold mb-2">@DateTime.Now.ToString("dd/MM/yyyy")</div>
+            <div class="text-white-50 small mb-2">Sucursal Activa: @(sucursalActual == 1 ? "Centro" : "Plaza")</div>
+            <div class="btn-group">
+                <a asp-action="CatalogoServicios" class="btn btn-outline-light border-secondary text-white">
+                    <i class="fa-solid fa-scissors me-1"></i> Catálogo
+                </a>
+                <a asp-action="Dashboard" asp-route-sucursalId="1" class="btn @(sucursalActual == 1 ? "btn-warning text-dark fw-bold" : "btn-dark border-secondary text-white")">Centro</a>
+                <a asp-action="Dashboard" asp-route-sucursalId="2" class="btn @(sucursalActual == 2 ? "btn-warning text-dark fw-bold" : "btn-dark border-secondary text-white")">Plaza</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS SUPERIORES -->
+    <div class="row g-4 mb-4">
+        <!-- Ingresos Estimados -->
+        <div class="col-12 col-md-4">
+            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-uppercase text-white-50 small fw-bold">INGRESOS ESTIMADOS</span>
+                    <i class="fa-solid fa-money-bill-wave text-success fs-4"></i>
+                </div>
+                <h2 class="display-6 fw-bold mb-0 text-white">
+                    @string.Format("{0:C}", ViewBag.IngresosEstimados)
+                </h2>
+                <small class="text-success mt-2 d-block">
+                    <i class="fa-solid fa-arrow-up"></i> Conectado a BD
+                </small>
+            </div>
+        </div>
+
+        <!-- Citas en la Sucursal -->
+        <div class="col-12 col-md-4">
+            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-uppercase text-white-50 small fw-bold">CITAS EN LA SUCURSAL</span>
+                    <i class="fa-solid fa-calendar-check text-primary fs-4"></i>
+                </div>
+                <h2 class="display-6 fw-bold mb-0 text-white">
+                    @(Model?.Count() ?? 0)
+                </h2>
+                <small class="text-white-50 mt-2 d-block">Registros filtrados por SP</small>
+            </div>
+        </div>
+
+        <!-- Sistema Telegram -->
+        <div class="col-12 col-md-4">
+            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-uppercase text-white-50 small fw-bold">SISTEMA TELEGRAM</span>
+                    <i class="fa-brands fa-telegram text-warning fs-4"></i>
+                </div>
+                <h2 class="display-6 fw-bold mb-0 text-white">Activo</h2>
+                <small class="text-white-50 mt-2 d-block">Notificaciones y recordatorios</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN INFERIOR -->
+    <div class="row g-4">
+        <!-- Tabla de Citas (Izquierda) -->
+        <div class="col-12 col-lg-8">
+            <div class="card bg-dark border-secondary p-4 rounded-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 text-white fw-bold">Agenda Activa (Sucursal Seleccionada)</h5>
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">Stored Procedure Activo</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-borderless align-middle mb-0">
+                        <thead>
+                            <tr class="border-bottom border-secondary text-white-50">
+                                <th class="pb-3">Cliente</th>
+                                <th class="pb-3">Barbero</th>
+                                <th class="pb-3">Fecha y Hora</th>
+                                <th class="pb-3">Estado</th>
+                                <th class="pb-3 text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var cita in Model)
+                                {
+                                    <tr class="border-bottom border-secondary border-opacity-25">
+                                        <td class="py-3 text-white fw-bold">@(cita.Usuario?.Nombre ?? "Cliente de Paso")</td>
+                                        <td class="py-3 text-warning">@(cita.Empleado?.Usuario?.Nombre ?? "Sin asignar")</td>
+                                        <td class="py-3 text-white-50">@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="py-3">
+                                            <span class="badge rounded-pill @(cita.Estado == "Completada" ? "bg-success text-white" : (cita.Estado == "Cancelada" ? "bg-danger text-white" : "bg-warning text-dark")) px-3 py-2">
+                                                @cita.Estado
+                                            </span>
+                                        </td>
+                                        <td class="py-3 text-center">
+                                            @if (cita.Estado != "Completada" && cita.Estado != "Cancelada")
+                                            {
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <!-- Botón Completar -->
+                                                    <form asp-action="CambiarEstado" method="post" class="d-inline">
+                                                        <input type="hidden" name="citaId" value="@cita.CitaId" />
+                                                        <input type="hidden" name="estado" value="Completada" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-success border-secondary text-success" title="Completar Cita">
+                                                            <i class="fa-solid fa-check"></i>
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- MEJORA: Botón Cancelar -->
+                                                    <form asp-action="CambiarEstado" method="post" class="d-inline" onsubmit="return confirm('¿Deseas cancelar esta cita?');">
+                                                        <input type="hidden" name="citaId" value="@cita.CitaId" />
+                                                        <input type="hidden" name="estado" value="Cancelada" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger border-secondary text-danger" title="Cancelar Cita">
+                                                            <i class="fa-solid fa-xmark"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-sm btn-outline-secondary border-secondary text-secondary" disabled title="Cita finalizada">
+                                                    <i class="fa-solid fa-lock"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-white-50 py-5">No hay citas registradas para esta sucursal.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de Rendimiento (Derecha) -->
+        <div class="col-12 col-lg-4">
+            <div class="card bg-dark border-secondary p-4 rounded-4 h-100">
+                <h5 class="mb-4 text-white fw-bold">Rendimiento Operativo</h5>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white">Base de Datos SQL</span>
+                    <span class="text-warning fw-bold">Conectado</span>
+                </div>
+                <div class="w-100 bg-warning mb-4" style="height: 2px;"></div>
+                
+                <p class="text-white-50 lh-lg mb-0 small">
+                    Los datos fluyen mediante procedimientos almacenados (<code>sp_ObtenerCitasPorSucursal</code>) reflejando la información en tiempo real hacia la vista.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

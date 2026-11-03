@@ -1,0 +1,232 @@
+@model IEnumerable<Lumina_Reserve_2.Models.Corte>
+@{
+    ViewData["Title"] = "Portafolio de Cortes";
+}
+
+<div class="container mt-5 pt-3 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-white display-5 mb-2">Estilos en Tendencia por <span class="brand-gold">Lumina Reserve</span></h1>
+        <p class="text-white-50">Explora nuestros trabajos. Haz clic en agendar para reservar este estilo.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- 1. Skin Fade -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/Skin-Fade.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Skin Fade">
+                    <h4 class="brand-gold fw-bold mb-2">Skin Fade</h4>
+                    <p class="text-white-50 small">Desvanecido impecable que llega hasta la piel. Ideal para un look muy limpio, fresco y de alto contraste en los laterales.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/Skin-Fade.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Skin Fade" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Low Fade -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/Low-Fade.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Low Fade">
+                    <h4 class="brand-gold fw-bold mb-2">Low Fade</h4>
+                    <p class="text-white-50 small">Degradado bajo que comienza justo por encima de las orejas y en la base de la nuca. Excelente opción para mantener oscuridad en los laterales.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/Low-Fade.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Low Fade" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Burst Fade -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/Burst-Fade.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Burst Fade">
+                    <h4 class="brand-gold fw-bold mb-2">Burst Fade</h4>
+                    <p class="text-white-50 small">Desvanecido en forma de semicírculo que sigue la curva de la oreja, dejando longitud en la nuca. Muy popular combinado con mullets o mohicanos.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/Burst-Fade.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Burst Fade" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Textured Crop -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Textured-Crop.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Textured Crop">
+                    <h4 class="brand-gold fw-bold mb-2">Textured Crop</h4>
+                    <p class="text-white-50 small">Laterales muy cortos con textura desordenada arriba y flequillo hacia adelante. Perfecto para disimular frentes amplias. Base del popular "Edgar Cut".</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Textured-Crop.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Textured Crop" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Modern Mullet -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Modern-Mullet.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Modern Mullet">
+                    <h4 class="brand-gold fw-bold mb-2">Modern Mullet</h4>
+                    <p class="text-white-50 small">El clásico de los 80. Mantiene volumen en la parte superior y longitud en la nuca, modernizado con un burst fade en los laterales. Atrevido y con carácter.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Modern-Mullet.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Modern Mullet" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Corte Brócoli (Zoomer) -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/Corte-Permanente-Zoomer.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Corte Brócoli">
+                    <h4 class="brand-gold fw-bold mb-2">Corte Brócoli (Zoomer)</h4>
+                    <p class="text-white-50 small">Favorito de la Generación Z. Laterales cortos con degradado y parte superior llena de rizos desordenados con mucho volumen hacia la frente.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/Corte-Permanente-Zoomer.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Corte Zoomer" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Taper Fade -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Taper-Fade.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Taper Fade">
+                    <h4 class="brand-gold fw-bold mb-2">Taper Fade</h4>
+                    <p class="text-white-50 small">Degradado muy sutil que solo afecta las patillas y la nuca baja, manteniendo el largo natural alrededor de la oreja. Muy profesional.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Taper-Fade.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Taper Fade" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Buzz Cut -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Buzz-Cut.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Buzz Cut">
+                    <h4 class="brand-gold fw-bold mb-2">Buzz Cut (Rapado)</h4>
+                    <p class="text-white-50 small">Estilo militar ultra corto y de longitud uniforme arriba, combinado con un degradado en los laterales. Ideal para bajo mantenimiento.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Buzz-Cut.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Buzz Cut" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Quiff Texturizado -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Quiff-Texturizado.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Quiff Texturizado">
+                    <h4 class="brand-gold fw-bold mb-2">Quiff Texturizado</h4>
+                    <p class="text-white-50 small">Volumen en la delantera peinado hacia arriba y atrás, con un acabado mate, despeinado y texturizado. Moderno y versátil.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Quiff-Texturizado.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Quiff Texturizado" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Caesar Cut -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Caesar-Cut.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Caesar Cut">
+                    <h4 class="brand-gold fw-bold mb-2">Caesar Cut</h4>
+                    <p class="text-white-50 small">Clásico atemporal de flequillo recto y corto hacia adelante, con los laterales recortados a la misma altura.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Caesar-Cut.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Caesar Cut" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. Wolf Cut -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/El-Wolf-Cut.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Wolf Cut">
+                    <h4 class="brand-gold fw-bold mb-2">Wolf Cut</h4>
+                    <p class="text-white-50 small">Híbrido entre el shag y el mullet. Gran volumen en la parte superior que se reduce en capas desconectadas hacia los hombros.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/El-Wolf-Cut.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Wolf Cut" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. High Fade -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/High-Fade.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="High Fade">
+                    <h4 class="brand-gold fw-bold mb-2">High Fade</h4>
+                    <p class="text-white-50 small">El degradado comienza en la parte más alta de la cabeza, dejando los laterales completamente expuestos.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/High-Fade.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="High Fade" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. Low Fade Edgar -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/Low-fade-Edgar.jpg" class="img-fluid rounded mb-3 w-100" style="height: 240px; object-fit: cover;" alt="Low Fade Edgar">
+                    <h4 class="brand-gold fw-bold mb-2">Low Fade Edgar</h4>
+                    <p class="text-white-50 small">La versión moderna del Edgar Cut clásico, incorporando un degradado bajo en los laterales para mayor contraste.</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="button" class="btn btn-dark-outline w-50 btn-sm" onclick="abrirImagen('/img/Low-fade-Edgar.jpg')"><i class="fa-solid fa-eye me-1 small"></i> Ver</button>
+                    <a asp-controller="Citas" asp-action="Agendar" asp-route-corte="Low Fade Edgar" class="btn btn-gold-fill w-50 btn-sm text-uppercase fw-bold text-center">Agendar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA AGRANDAR IMAGEN -->
+<div class="modal fade" id="modalImagenFondo" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-transparent border-0">
+      <div class="modal-header border-0 pb-0">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center pt-0">
+        <img id="imgExpandida" src="" class="img-fluid rounded shadow-lg" style="max-height: 80vh;" alt="Corte Expandido">
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        function abrirImagen(ruta) {
+            document.getElementById('imgExpandida').src = ruta;
+            var myModal = new bootstrap.Modal(document.getElementById('modalImagenFondo'));
+            myModal.show();
+        }
+    </script>
+}

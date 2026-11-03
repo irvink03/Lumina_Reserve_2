@@ -1,0 +1,97 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Lumina Reserve</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        .custom-dropdown-item:hover {
+            background-color: #262626 !important;
+            color: #d4af37 !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-nav-black py-3">
+            <div class="container-fluid px-4 px-lg-5">
+                <a class="navbar-brand brand-gold fs-4" asp-controller="Home" asp-action="Index">LUMINA RESERVE</a>
+                <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse justify-content-center" id="navMain">
+                    <ul class="navbar-nav gap-lg-3 gap-2 py-2 py-lg-0 text-center">
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="NuestroEquipo">Equipo</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Portafolio" asp-action="Portafolio">Fotos / Trabajos</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="Ubicacion">Ubicación</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Resenas" asp-action="Resenas">Reseñas</a></li>
+                    </ul>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-center gap-3">
+                    <a class="btn btn-gold-outline btn-sm fw-bold text-nowrap" asp-controller="Citas" asp-action="Agendar">AGENDAR CITA</a>
+                    
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        var userName = User.Identity.Name ?? "Usuario";
+                        // Obtenemos el identificador limpio de las claims sin tocar la BD en el layout
+                        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "1";
+                        var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type.Contains("role"))?.Value ?? "Cliente";
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <!-- FOTO DE PERFIL EN LA BARRA DE NAVEGACIÓN -->
+                                <img src="~/images/perfiles/@(userId).jpg" asp-append-version="true"
+                                     onerror="this.onerror=null; this.src='/images/default-user.png';" 
+                                     class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; border: 1px solid var(--gold);" alt="Usuario" />
+                                <span class="d-none d-md-inline">@userName</span>
+                            </button>
+                            
+                            <ul class="dropdown-menu dropdown-menu-end bg-dark-card border-secondary mt-2 shadow-lg" style="width: 250px; background-color: #141414;">
+                                <li class="px-3 py-2 border-bottom border-secondary mb-2 text-center">
+                                    <img src="~/images/perfiles/@(userId).jpg" asp-append-version="true"
+                                         onerror="this.onerror=null; this.src='/images/default-user.png';" 
+                                         class="rounded-circle mb-2" style="width: 60px; height: 60px; object-fit: cover; border: 2px solid var(--gold);" alt="Usuario" />
+                                    <strong class="text-white d-block">@userName</strong>
+                                    <span class="badge border border-warning text-warning mt-1">@userRole.ToUpper()</span>
+                                </li>
+                                <li><a class="dropdown-item text-white-50 py-2 custom-dropdown-item" asp-controller="Cuenta" asp-action="Perfil"><i class="fa-solid fa-id-badge me-2"></i> Mi Perfil</a></li>
+                                <li><a class="dropdown-item text-white-50 py-2 custom-dropdown-item" asp-controller="Citas" asp-action="Historial"><i class="fa-solid fa-clock-rotate-left me-2"></i> Historial de Citas</a></li>
+                                @if(userRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <li><hr class="dropdown-divider bg-secondary"></li>
+                                    <li><a class="dropdown-item text-danger py-2 custom-dropdown-item" asp-controller="Admin" asp-action="Dashboard"><i class="fa-solid fa-chart-line me-2"></i> Panel de Administración</a></li>
+                                }
+                                <li><hr class="dropdown-divider bg-secondary"></li>
+                                <li><a class="dropdown-item text-white-50 py-2 custom-dropdown-item" asp-controller="Cuenta" asp-action="Logout"><i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Cerrar Sesión</a></li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="text-white text-decoration-none small fw-bold me-2 text-nowrap" asp-controller="Cuenta" asp-action="Login">Iniciar Sesión</a>
+                        <a class="btn btn-gold-fill btn-sm fw-bold text-nowrap" asp-controller="Cuenta" asp-action="Registro">REGISTRARSE</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <footer class="text-center text-white-50 py-4 mt-5 border-top border-dark">
+        <small>© 2026 - Lumina Reserve - Todos los derechos reservados.</small>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

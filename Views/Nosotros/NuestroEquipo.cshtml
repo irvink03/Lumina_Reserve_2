@@ -1,0 +1,93 @@
+@model IEnumerable<Lumina_Reserve_2.Models.Empleado>
+@{
+    ViewData["Title"] = "Nuestro Equipo";
+}
+
+<div class="container mt-5 pt-3 mb-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-white display-5 mb-2">NUESTROS <span class="brand-gold">ESPECIALISTAS</span></h1>
+        <p class="text-white-50">Profesionales dedicados al arte de la barbería y la imagen personal.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Irvin -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/irvin.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Irvin Chavarría">
+                    <h4 class="text-white fw-bold mb-1">Irvin Chavarría</h4>
+                    <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">MAESTRO BARBERO / FUNDADOR</small>
+                    <p class="text-white-50 small">Especialista en cortes urbanos y fade perfecto. Estilo impecable y atención al detalle.</p>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill w-50 fw-bold text-center">AGENDAR</a>
+                    <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline w-50 text-uppercase fw-bold text-white-50 border-secondary text-center">VER TRABAJOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fernando -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/fernando.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Fernando Rodríguez">
+                    <h4 class="text-white fw-bold mb-1">Fernando Rodríguez</h4>
+                    <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">ESPECIALISTA CLÁSICO</small>
+                    <p class="text-white-50 small">Cortes tradicionales a tijera y arreglos de barba con toalla caliente.</p>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill w-50 fw-bold text-center">AGENDAR</a>
+                    <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline w-50 text-uppercase fw-bold text-white-50 border-secondary text-center">VER TRABAJOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diego -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/diego.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Diego Silva">
+                    <h4 class="text-white fw-bold mb-1">Diego Silva</h4>
+                    <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">ESTILISTA Y COLORISTA</small>
+                    <p class="text-white-50 small">Experto en colorimetría, texturizados y tratamientos faciales profundos.</p>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill w-50 fw-bold text-center">AGENDAR</a>
+                    <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline w-50 text-uppercase fw-bold text-white-50 border-secondary text-center">VER TRABAJOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Erick -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/erick.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Erick Ulises">
+                    <h4 class="text-white fw-bold mb-1">Erick Ulises</h4>
+                    <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">DISEÑO Y FREESTYLE</small>
+                    <p class="text-white-50 small">Creativo en trazos libres, figuras geométricas y estilos modernos vanguardistas.</p>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill w-50 fw-bold text-center">AGENDAR</a>
+                    <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline w-50 text-uppercase fw-bold text-white-50 border-secondary text-center">VER TRABAJOS</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geovany -->
+        <div class="col-md-4">
+            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+                <div>
+                    <img src="~/img/ivan.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Geovany Iván">
+                    <h4 class="text-white fw-bold mb-1">Geovany Iván</h4>
+                    <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">CUIDADO INTEGRAL</small>
+                    <p class="text-white-50 small">Especialista en mantenimiento de barba completa, perfilado con navaja y masajes capilares.</p>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill w-50 fw-bold text-center">AGENDAR</a>
+                    <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline w-50 text-uppercase fw-bold text-white-50 border-secondary text-center">VER TRABAJOS</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

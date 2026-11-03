@@ -1,0 +1,114 @@
+:root {
+    --bg-main: #0d0d0d;
+    --bg-card: #141414;
+    --bg-input: #1f2328;
+    --gold: #d4af37;
+    --gold-hover: #b5952f;
+    --border-color: #262626;
+    --text-muted: #999999;
+}
+
+body {
+    background-color: var(--bg-main) !important;
+    color: #ffffff;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.bg-nav-black {
+    background-color: #080808 !important;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.brand-gold {
+    color: var(--gold) !important;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.nav-link-custom {
+    color: #e0e0e0 !important;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-link-custom:hover {
+    color: var(--gold) !important;
+}
+
+.btn-gold-fill {
+    background-color: var(--gold) !important;
+    color: #0d0d0d !important;
+    font-weight: 700;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 20px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-gold-fill:hover {
+    background-color: var(--gold-hover) !important;
+    color: #ffffff !important;
+}
+
+.btn-gold-outline {
+    background-color: transparent !important;
+    color: var(--gold) !important;
+    border: 1px solid var(--gold) !important;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 8px 18px;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-gold-outline:hover {
+    background-color: var(--gold) !important;
+    color: #0d0d0d !important;
+}
+
+.btn-dark-outline {
+    background-color: transparent !important;
+    color: #ffffff !important;
+    border: 1px solid #333333 !important;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
+}
+
+.btn-dark-outline:hover {
+    background-color: #222222 !important;
+    border-color: #555555 !important;
+}
+
+.dark-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+/* CLASE RESTAURADA PARA LOS BORDES DORADOS */
+.border-gold {
+    border: 1px solid var(--gold) !important;
+}
+
+.form-dark-control {
+    background-color: var(--bg-input) !important;
+    border: 1px solid #2d3238 !important;
+    color: #ffffff !important;
+    border-radius: 6px;
+    padding: 10px 14px;
+}
+
+.form-dark-control:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15) !important;
+}
+
+.stars-gold {
+    color: var(--gold);
+    letter-spacing: 2px;
+}

@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<style>
+    .hero-section {
+        /* IMPORTANTE: Cambia 'fondo-barberia.jpg' por el nombre EXACTO de la imagen que tienes en tu carpeta wwwroot/img/ */
+        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.95)), url('/img/fondo-barberia.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+    }
+</style>
+
+<div class="hero-section container-fluid">
+    <div class="row justify-content-center w-100">
+        <div class="col-lg-8">
+            <!-- Reduje el tamaño de display-3 a display-4 para que "LUMINA RESERVE" quede en una sola línea -->
+            <h1 class="display-4 fw-bold brand-gold mb-3" style="letter-spacing: 3px; white-space: nowrap;">LUMINA RESERVE</h1>
+            <p class="text-white fs-5 mb-4">Tu cita con el estilo, en el momento preciso</p>
+            <p class="text-white-50 mx-auto mb-5" style="max-width: 700px;">
+                La plataforma definitiva para gestionar tus citas en Tuxtla Gutiérrez. Evita llamadas, asegura tu lugar en nuestras sucursales Centro o Plaza, y vive la experiencia premium.
+            </p>
+            
+            <!-- Botones alineados horizontalmente -->
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill px-4 py-3 fw-bold">AGENDAR CITA AHORA</a>
+                <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline px-4 py-3 fw-bold text-white">VER PORTAFOLIO</a>
+            </div>
+        </div>
+    </div>
+</div>

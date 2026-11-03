@@ -1,0 +1,133 @@
+@model IEnumerable<Lumina_Reserve_2.Models.Corte>
+
+@{
+    ViewData["Title"] = "Gestión de Catálogo";
+}
+
+<div class="container mt-5 pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-white">GESTIÓN DE <span class="brand-gold">CATÁLOGO Y CORTES</span></h2>
+        <a asp-action="Dashboard" class="btn btn-dark-outline fw-bold">← Volver al Dashboard</a>
+    </div>
+
+    @if (TempData["ExitoAdmin"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["ExitoAdmin"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Formulario de Edición / Registro -->
+        <div class="col-md-4">
+            <div class="dark-card p-4">
+                <h4 class="text-white fw-bold mb-3" id="formTitle">Agregar Nuevo Servicio</h4>
+                <form asp-action="GuardarCorte" method="post">
+                    <input type="hidden" id="corteId" name="corteId" value="0" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Nombre del Servicio</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control form-dark-control" required placeholder="Ej. Corte Clásico" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Precio ($)</label>
+                        <input type="number" step="0.01" id="precio" name="precio" class="form-control form-dark-control" required placeholder="180.00" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control form-dark-control" rows="3" placeholder="Detalles del corte..."></textarea>
+                    </div>
+
+                    <button type="submit" id="btnGuardar" class="btn btn-gold-fill w-100 fw-bold py-2">Guardar Servicio</button>
+                    <button type="button" onclick="limpiarFormulario()" class="btn btn-dark-outline w-100 fw-bold mt-2 py-2">Limpiar Campos</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabla con lista de cortes desde SQL Server -->
+        <div class="col-md-8">
+            <div class="dark-card p-4">
+                <h4 class="text-white fw-bold mb-3">Servicios Registrados en BD</h4>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead>
+                            <tr class="brand-gold">
+                                <th>ID</th>
+                                <th>Servicio</th>
+                                <th>Precio</th>
+                                <th>Descripción</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var corte in Model)
+                                {
+                                    <tr>
+                                        <td>@corte.CorteId</td>
+                                        <td class="fw-bold text-white">@corte.Nombre</td>
+                                        <td class="brand-gold fw-bold">$@corte.Precio.ToString("N2")</td>
+                                        <td class="text-white-50 small">@corte.Descripcion</td>
+                                        <td>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-warning fw-bold btn-seleccionar"
+                                                    data-id="@corte.CorteId"
+                                                    data-nombre="@corte.Nombre"
+                                                    data-precio="@corte.Precio"
+                                                    data-descripcion="@corte.Descripcion">
+                                                Seleccionar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-white-50 py-4">
+                                        No hay cortes o servicios registrados en la base de datos.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.btn-seleccionar').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var id = this.getAttribute('data-id');
+                    var nombre = this.getAttribute('data-nombre');
+                    var precio = this.getAttribute('data-precio');
+                    var descripcion = this.getAttribute('data-descripcion');
+
+                    document.getElementById('formTitle').innerText = "Modificar Servicio (ID: " + id + ")";
+                    document.getElementById('corteId').value = id;
+                    document.getElementById('nombre').value = nombre;
+                    document.getElementById('precio').value = precio;
+                    document.getElementById('descripcion').value = descripcion;
+                    document.getElementById('btnGuardar').innerText = "Actualizar Precio / Servicio";
+                });
+            });
+        });
+
+        function limpiarFormulario() {
+            document.getElementById('formTitle').innerText = "Agregar Nuevo Servicio";
+            document.getElementById('corteId').value = "0";
+            document.getElementById('nombre').value = "";
+            document.getElementById('precio').value = "";
+            document.getElementById('descripcion').value = "";
+            document.getElementById('btnGuardar').innerText = "Guardar Servicio";
+        }
+    </script>
+}

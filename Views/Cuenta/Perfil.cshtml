@@ -1,0 +1,92 @@
+@model Lumina_Reserve_2.Models.Usuario
+
+@{
+    ViewData["Title"] = "Mi Perfil";
+}
+
+<div class="container mt-5 pt-3">
+    <h2 class="fw-bold text-white mb-4">MI <span class="brand-gold">PERFIL</span></h2>
+    
+    @if (TempData["ExitoPerfil"] != null)
+    {
+        <div class="alert alert-success">@TempData["ExitoPerfil"]</div>
+    }
+
+    <form asp-action="ActualizarPerfil" asp-controller="Cuenta" method="post" enctype="multipart/form-data">
+        <div class="row g-4">
+            <!-- Columna Avatar -->
+            <div class="col-md-4">
+                <div class="dark-card p-4 text-center h-100 d-flex flex-column justify-content-center align-items-center">
+                    
+                    <!-- IMAGEN CENTRAL ACTUALIZADA -->
+                    <div class="rounded-circle d-flex justify-content-center align-items-center mb-3 mx-auto" 
+                         style="width: 120px; height: 120px; background-color: #1a1a1a; border: 2px solid var(--gold); box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); overflow: hidden;">
+                        <img id="imgPreview" src="~/images/perfiles/@(Model.UsuarioId).jpg" asp-append-version="true"
+                             onerror="this.onerror=null; this.src='/images/default-user.png';" 
+                             style="width: 100%; height: 100%; object-fit: cover;" alt="Foto de @Model.Nombre" />
+                    </div>
+                    
+                    <h4 class="brand-gold fw-bold text-uppercase mb-1">@(Model.Nombre)</h4>
+                    <small class="text-white-50 d-block mb-4">Miembro desde: @(Model.FechaRegistro?.ToString("dd/MM/yyyy") ?? "--")</small>
+                    
+                    <label for="fotoPerfil" class="btn btn-dark-outline w-100 py-2 fw-bold" style="cursor: pointer;">Cambiar Foto</label>
+                    <input type="file" id="fotoPerfil" name="fotoPerfil" class="d-none" accept="image/jpeg, image/png" />
+                </div>
+            </div>
+
+            <!-- Columna Formularios -->
+            <div class="col-md-8">
+                <div class="dark-card p-4 p-md-5">
+                    <h4 class="text-white fw-bold mb-4">Información Personal</h4>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-white-50 small">Nombre Completo</label>
+                            <input type="text" name="nombre" class="form-control form-dark-control" value="@Model.Nombre" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white-50 small">Teléfono</label>
+                            <input type="text" name="telefono" class="form-control form-dark-control" value="@Model.Telefono" />
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="form-label text-white-50 small">Correo Electrónico (No modificable)</label>
+                        <input type="email" class="form-control form-dark-control" value="@Model.Correo" disabled />
+                    </div>
+
+                    <h4 class="text-white fw-bold mb-4">Seguridad</h4>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-white-50 small">Nueva Contraseña</label>
+                            <input type="password" name="nuevaPassword" class="form-control form-dark-control" placeholder="Dejar en blanco para no cambiar" />
+                        </div>
+                    </div>
+                    
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-gold-fill px-5 fw-bold">Guardar Cambios</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Script para previsualizar la foto seleccionada antes de guardarla -->
+@section Scripts {
+    <script>
+        document.getElementById('fotoPerfil').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('imgPreview');
+                    if (img) {
+                        img.src = e.target.result;
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

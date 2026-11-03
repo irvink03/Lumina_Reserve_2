@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Registro de Usuario";
+}
+
+<div class="container mt-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="p-4 p-md-5 shadow-lg" style="background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px;">
+                <h3 class="text-center mb-4 fw-bold" style="color: #d4af37;">Crear Cuenta</h3>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger py-2 mb-3">@ViewBag.Error</div>
+                }
+
+                <form asp-action="Registro" method="post">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Nombre Completo</label>
+                        <input type="text" name="Nombre" class="form-control bg-dark text-white border-secondary" placeholder="Tu nombre" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Correo Electrónico</label>
+                        <input type="email" name="Correo" class="form-control bg-dark text-white border-secondary" placeholder="tucorreo@email.com" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small">Teléfono (WhatsApp)</label>
+                        <input type="tel" name="Telefono" class="form-control bg-dark text-white border-secondary" placeholder="9611234567" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-white-50 small">Contraseña</label>
+                        <input type="password" name="PasswordHash" class="form-control bg-dark text-white border-secondary" placeholder="********" required />
+                    </div>
+
+                    <div class="p-3 mb-4 rounded" style="background-color: #161616; border: 1px solid #332d18;">
+                        <h6 class="mb-2 small fw-bold" style="color: #d4af37;"><i class="fa-brands fa-telegram"></i> Verificación con Telegram Bot</h6>
+                        <ol class="text-white-50 small mb-0 ps-3" style="font-size: 0.8rem;">
+                            <li>Busca nuestro bot en Telegram: <strong style="color: #d4af37;">@@LuminaReserva_bot</strong></li>
+                            <li>Inícialo escribiendo <strong>/start</strong></li>
+                            <li>Envíale tu correo electrónico registrado para que te asigne tu código de acceso temporal.</li>
+                        </ol>
+                    </div>
+
+                    <button type="submit" class="btn w-100 py-2 fw-bold" style="background-color: #d4af37; color: #000; border-radius: 8px;">Registrarse</button>
+
+                    <div class="text-center mt-4">
+                        <small class="text-white-50">¿Ya tienes una cuenta? <a asp-action="Login" style="color: #d4af37;" class="text-decoration-none">Inicia sesión aquí</a></small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
