@@ -1,0 +1,153 @@
+/* ===================== PANEL DE ADMINISTRACIÓN ===================== */
+.admin {
+    --a-surface: #161616;
+    --a-surface-2: #1d1d1d;
+    --a-line: #2a2a2a;
+    --a-grid: #2c2c2c;
+    --a-ink: #f2f2f2;
+    --a-ink-2: rgba(255, 255, 255, .62);
+    --a-ink-3: rgba(255, 255, 255, .42);
+    --a-gold: #d4af37;
+    --a-ok: #2fb46e;
+    --a-info: #3aa6d8;
+    --a-warn: #e8a317;
+    --a-bad: #e5484d;
+    color: var(--a-ink);
+}
+
+.admin .admin-card {
+    background: var(--a-surface);
+    border: 1px solid var(--a-line);
+    border-radius: 14px;
+    padding: 1.5rem;
+    height: 100%;
+}
+.admin .admin-card h2 { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--a-ink); }
+.admin .admin-card .sub { color: var(--a-ink-3); font-size: .8rem; }
+
+/* ---- Navegación del panel ---- */
+.admin .admin-nav { display: flex; flex-wrap: wrap; gap: .35rem; border-bottom: 1px solid var(--a-line); margin-bottom: 1.5rem; }
+.admin .admin-nav a {
+    color: var(--a-ink-2); text-decoration: none; font-weight: 600; font-size: .92rem;
+    padding: .7rem 1rem; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    display: inline-flex; align-items: center; gap: .5rem; transition: color .15s ease, border-color .15s ease;
+}
+.admin .admin-nav a:hover { color: var(--a-ink); }
+.admin .admin-nav a.activo { color: var(--a-gold); border-bottom-color: var(--a-gold); }
+
+/* ---- Filtros (una sola fila arriba de los datos) ---- */
+.admin .filtros { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-bottom: 1.5rem; }
+.admin .segmentado { display: inline-flex; flex-wrap: wrap; background: var(--a-surface); border: 1px solid var(--a-line); border-radius: 10px; padding: 3px; gap: 2px; }
+.admin .segmentado a {
+    color: var(--a-ink-2); text-decoration: none; font-size: .85rem; font-weight: 600;
+    padding: .45rem .85rem; border-radius: 7px; white-space: nowrap; transition: background .15s ease, color .15s ease;
+}
+.admin .segmentado a:hover { color: var(--a-ink); background: var(--a-surface-2); }
+.admin .segmentado a.activo { background: var(--a-gold); color: #111; }
+.admin .rango { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.admin .rango input[type=date] {
+    background: var(--a-surface); border: 1px solid var(--a-line); color: var(--a-ink);
+    border-radius: 8px; padding: .38rem .6rem; font-size: .85rem; color-scheme: dark;
+}
+.admin .rango button { font-size: .85rem; padding: .42rem .9rem; border-radius: 8px; }
+.admin .etiqueta-rango { color: var(--a-ink-3); font-size: .85rem; }
+.admin .etiqueta-rango b { color: var(--a-ink-2); font-weight: 600; }
+
+/* ---- Tarjetas de KPI ---- */
+.admin .kpi { background: var(--a-surface); border: 1px solid var(--a-line); border-radius: 14px; padding: 1.15rem 1.25rem; height: 100%; }
+.admin .kpi .label { color: var(--a-ink-2); font-size: .82rem; display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.admin .kpi .label i { color: var(--a-ink-3); }
+.admin .kpi .valor { font-size: 1.65rem; font-weight: 700; margin: .45rem 0 .2rem; letter-spacing: -.01em; color: var(--a-ink); line-height: 1.15; }
+.admin .kpi .detalle { color: var(--a-ink-3); font-size: .78rem; }
+.admin .chip { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 700; padding: .12rem .5rem; border-radius: 999px; }
+.admin .chip.ok { background: rgba(47, 180, 110, .15); color: #6fd39d; }
+.admin .chip.bad { background: rgba(229, 72, 77, .15); color: #ff8a8d; }
+
+/* ---- Estados (siempre con icono + texto) ---- */
+.admin .estado { display: inline-flex; align-items: center; gap: .4rem; font-size: .78rem; font-weight: 700; padding: .28rem .65rem; border-radius: 999px; white-space: nowrap; }
+.admin .estado.Pendiente  { background: rgba(232, 163, 23, .14); color: #f3c25a; }
+.admin .estado.Confirmada { background: rgba(58, 166, 216, .15); color: #7cc6ea; }
+.admin .estado.Completada { background: rgba(47, 180, 110, .15); color: #6fd39d; }
+.admin .estado.Cancelada  { background: rgba(229, 72, 77, .14); color: #ff8a8d; }
+.admin .medidor { height: 6px; background: var(--a-surface-2); border-radius: 999px; overflow: hidden; }
+.admin .medidor span { display: block; height: 100%; border-radius: 999px; }
+.admin .medidor .Pendiente  { background: var(--a-warn); }
+.admin .medidor .Confirmada { background: var(--a-info); }
+.admin .medidor .Completada { background: var(--a-ok); }
+.admin .medidor .Cancelada  { background: var(--a-bad); }
+
+/* ---- Gráfica de columnas (una serie) ---- */
+.admin .grafica { position: relative; height: 220px; margin: 1.25rem 0 0 3.25rem; }
+.admin .grafica .linea-grid { position: absolute; left: 0; right: 0; border-top: 1px solid var(--a-grid); }
+.admin .grafica .linea-grid span { position: absolute; right: calc(100% + .5rem); top: -.6rem; color: var(--a-ink-3); font-size: .72rem; white-space: nowrap; }
+.admin .grafica .columnas { position: absolute; inset: 0; display: flex; align-items: stretch; gap: 2px; }
+.admin .grafica .slot { flex: 1; display: flex; align-items: flex-end; justify-content: center; cursor: default; outline: none; border-radius: 4px; }
+.admin .grafica .slot:hover, .admin .grafica .slot:focus-visible { background: rgba(255, 255, 255, .035); }
+.admin .grafica .barra { width: min(24px, 72%); background: var(--a-gold); border-radius: 4px 4px 0 0; }
+.admin .grafica .slot:hover .barra, .admin .grafica .slot:focus-visible .barra { filter: brightness(1.12); }
+.admin .ejes-x { display: flex; gap: 2px; margin-left: 3.25rem; margin-top: .45rem; }
+.admin .ejes-x span { flex: 1; text-align: center; color: var(--a-ink-3); font-size: .7rem; }
+.admin .tooltip-dato {
+    position: fixed; z-index: 1080; pointer-events: none; background: #0b0b0b; border: 1px solid var(--a-line);
+    border-radius: 8px; padding: .5rem .7rem; font-size: .8rem; color: var(--a-ink); box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    transform: translate(-50%, calc(-100% - 10px)); white-space: nowrap; display: none;
+}
+.admin .tooltip-dato b { display: block; font-size: .95rem; }
+.admin .tooltip-dato small { color: var(--a-ink-2); }
+
+/* ---- Barras horizontales (top servicios) ---- */
+.admin .hbar { display: grid; grid-template-columns: minmax(90px, 38%) 1fr; align-items: center; gap: .75rem; padding: .5rem 0; }
+.admin .hbar .nombre { color: var(--a-ink-2); font-size: .88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin .hbar .pista { display: flex; align-items: center; gap: .6rem; }
+.admin .hbar .pista span.barra { height: 14px; background: var(--a-gold); border-radius: 0 4px 4px 0; min-width: 2px; }
+.admin .hbar .pista small { color: var(--a-ink-2); font-size: .8rem; white-space: nowrap; }
+
+/* ---- Tablas ---- */
+.admin .tabla { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.admin .tabla th { color: var(--a-ink-3); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; padding: .6rem .75rem; border-bottom: 1px solid var(--a-line); white-space: nowrap; }
+.admin .tabla td { padding: .8rem .75rem; border-bottom: 1px solid #222; vertical-align: middle; color: var(--a-ink); }
+.admin .tabla tr:last-child td { border-bottom: none; }
+.admin .tabla tbody tr:hover td { background: rgba(255, 255, 255, .02); }
+.admin .tabla .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.admin .tabla .tenue { color: var(--a-ink-3); font-size: .8rem; }
+.admin .tabla .inactivo td { opacity: .55; }
+.admin .badge-invitado { font-size: .68rem; font-weight: 700; color: var(--a-ink-2); border: 1px solid var(--a-line); border-radius: 999px; padding: .05rem .45rem; margin-left: .35rem; }
+
+.admin .acciones { display: flex; gap: .35rem; justify-content: flex-end; flex-wrap: nowrap; }
+.admin .btn-accion {
+    width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; border: 1px solid var(--a-line); background: var(--a-surface-2); color: var(--a-ink-2);
+    transition: all .15s ease; font-size: .85rem;
+}
+.admin .btn-accion:hover { color: #fff; }
+.admin .btn-accion.confirmar:hover { border-color: var(--a-info); background: rgba(58, 166, 216, .18); }
+.admin .btn-accion.completar:hover { border-color: var(--a-ok); background: rgba(47, 180, 110, .18); }
+.admin .btn-accion.cancelar:hover, .admin .btn-accion.eliminar:hover { border-color: var(--a-bad); background: rgba(229, 72, 77, .18); }
+
+.admin .chips-estado { display: flex; flex-wrap: wrap; gap: .35rem; }
+.admin .chips-estado a {
+    font-size: .78rem; font-weight: 600; color: var(--a-ink-2); text-decoration: none;
+    border: 1px solid var(--a-line); border-radius: 999px; padding: .25rem .7rem;
+}
+.admin .chips-estado a.activo { border-color: var(--a-gold); color: var(--a-gold); }
+
+.admin .vacio { color: var(--a-ink-3); text-align: center; padding: 2.5rem 1rem; font-size: .9rem; }
+.admin details.ver-tabla summary { color: var(--a-ink-3); font-size: .8rem; cursor: pointer; margin-top: 1rem; }
+.admin .form-admin label { color: var(--a-ink-2); font-size: .82rem; margin-bottom: .3rem; }
+
+/* ---- Interruptor activo / inactivo ---- */
+.admin .switch-estado {
+    display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--a-line); background: var(--a-surface-2);
+    border-radius: 999px; padding: .25rem .7rem; font-size: .78rem; font-weight: 700; color: var(--a-ink-2);
+}
+.admin .switch-estado .punto { width: 8px; height: 8px; border-radius: 50%; background: var(--a-ink-3); }
+.admin .switch-estado.on { color: #6fd39d; border-color: rgba(47, 180, 110, .45); }
+.admin .switch-estado.on .punto { background: var(--a-ok); }
+.admin .switch-estado:hover { border-color: var(--a-gold); color: var(--a-ink); }
+
+@media (max-width: 575.98px) {
+    .admin .admin-card { padding: 1.1rem; }
+    .admin .grafica { margin-left: 2.6rem; height: 180px; }
+    .admin .ejes-x { margin-left: 2.6rem; }
+    .admin .kpi .valor { font-size: 1.35rem; }
+}

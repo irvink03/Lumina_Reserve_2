@@ -428,3 +428,12 @@ FodyWeavers.xsd
 #*.lscache
 appsettings.Development.json
 *.bacpac
+# Fotos de perfil subidas por los usuarios
+wwwroot/img/perfiles/
+
+# Configuración del hosting (credenciales reales) y claves de sesión
+appsettings.Production.json
+App_Data/keys/
+publicar/
+*.zip
+logs/

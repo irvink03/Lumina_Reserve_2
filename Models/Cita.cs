@@ -18,7 +18,7 @@ namespace Lumina_Reserve_2.Models
 
         public string? Estado { get; set; } = "Pendiente";
 
-        public DateTime? FechaCreacion { get; set; } = DateTime.Now;
+        public DateTime? FechaCreacion { get; set; } = Lumina_Reserve_2.Services.Reloj.Ahora;
 
         // Propiedad para el control de recordatorios por Telegram
         public bool RecordatorioEnviado { get; set; } = false;

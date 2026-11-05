@@ -3,6 +3,34 @@
     ViewData["Title"] = "Nuestro Equipo";
 }
 
+<style>
+    /* Fotos del equipo: en gris y a color al pasar el mouse (o al tocar la tarjeta en celular). */
+    .tarjeta-equipo { transition: transform .3s ease, box-shadow .3s ease; outline: none; }
+    .tarjeta-equipo:hover, .tarjeta-equipo:focus-within, .tarjeta-equipo:focus {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 40px -18px rgba(212, 175, 55, .45);
+    }
+    .foto-equipo { position: relative; height: 300px; overflow: hidden; border-radius: .375rem; background: #111; }
+    .foto-equipo img {
+        width: 100%; height: 100%; object-fit: cover;
+        filter: grayscale(1) contrast(1.05);
+        transition: filter .6s ease, transform .9s ease;
+    }
+    .foto-equipo::after {
+        content: ""; position: absolute; inset: 10px; border: 1px solid rgba(212, 175, 55, 0);
+        border-radius: .25rem; transition: border-color .5s ease; pointer-events: none;
+    }
+    .tarjeta-equipo:hover .foto-equipo img,
+    .tarjeta-equipo:focus .foto-equipo img,
+    .tarjeta-equipo:focus-within .foto-equipo img { filter: grayscale(0) contrast(1.05); transform: scale(1.05); }
+    .tarjeta-equipo:hover .foto-equipo::after,
+    .tarjeta-equipo:focus .foto-equipo::after,
+    .tarjeta-equipo:focus-within .foto-equipo::after { border-color: rgba(212, 175, 55, .65); }
+    @@media (prefers-reduced-motion: reduce) {
+        .tarjeta-equipo, .foto-equipo img, .foto-equipo::after { transition: none; }
+    }
+</style>
+
 <div class="container mt-5 pt-3 mb-5">
     <div class="text-center mb-5">
         <h1 class="fw-bold text-white display-5 mb-2">NUESTROS <span class="brand-gold">ESPECIALISTAS</span></h1>
@@ -12,9 +40,9 @@
     <div class="row g-4 justify-content-center">
         <!-- Irvin -->
         <div class="col-md-4">
-            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+            <div class="dark-card tarjeta-equipo p-3 h-100 d-flex flex-column justify-content-between border-gold" tabindex="0">
                 <div>
-                    <img src="~/img/irvin.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Irvin Chavarría">
+                    <div class="foto-equipo mb-3"><img src="~/img/irvin.jpg" alt="Irvin Chavarría" loading="lazy"></div>
                     <h4 class="text-white fw-bold mb-1">Irvin Chavarría</h4>
                     <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">MAESTRO BARBERO / FUNDADOR</small>
                     <p class="text-white-50 small">Especialista en cortes urbanos y fade perfecto. Estilo impecable y atención al detalle.</p>
@@ -28,9 +56,9 @@
 
         <!-- Fernando -->
         <div class="col-md-4">
-            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+            <div class="dark-card tarjeta-equipo p-3 h-100 d-flex flex-column justify-content-between border-gold" tabindex="0">
                 <div>
-                    <img src="~/img/fernando.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Fernando Rodríguez">
+                    <div class="foto-equipo mb-3"><img src="~/img/fernando.jpg" alt="Fernando Rodríguez" loading="lazy"></div>
                     <h4 class="text-white fw-bold mb-1">Fernando Rodríguez</h4>
                     <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">ESPECIALISTA CLÁSICO</small>
                     <p class="text-white-50 small">Cortes tradicionales a tijera y arreglos de barba con toalla caliente.</p>
@@ -44,9 +72,9 @@
 
         <!-- Diego -->
         <div class="col-md-4">
-            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+            <div class="dark-card tarjeta-equipo p-3 h-100 d-flex flex-column justify-content-between border-gold" tabindex="0">
                 <div>
-                    <img src="~/img/diego.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Diego Silva">
+                    <div class="foto-equipo mb-3"><img src="~/img/diego.jpg" alt="Diego Silva" loading="lazy"></div>
                     <h4 class="text-white fw-bold mb-1">Diego Silva</h4>
                     <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">ESTILISTA Y COLORISTA</small>
                     <p class="text-white-50 small">Experto en colorimetría, texturizados y tratamientos faciales profundos.</p>
@@ -60,9 +88,9 @@
 
         <!-- Erick -->
         <div class="col-md-4">
-            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+            <div class="dark-card tarjeta-equipo p-3 h-100 d-flex flex-column justify-content-between border-gold" tabindex="0">
                 <div>
-                    <img src="~/img/erick.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Erick Ulises">
+                    <div class="foto-equipo mb-3"><img src="~/img/erick.jpg" alt="Erick Ulises" loading="lazy"></div>
                     <h4 class="text-white fw-bold mb-1">Erick Ulises</h4>
                     <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">DISEÑO Y FREESTYLE</small>
                     <p class="text-white-50 small">Creativo en trazos libres, figuras geométricas y estilos modernos vanguardistas.</p>
@@ -76,9 +104,9 @@
 
         <!-- Geovany -->
         <div class="col-md-4">
-            <div class="dark-card p-3 h-100 d-flex flex-column justify-content-between border-gold">
+            <div class="dark-card tarjeta-equipo p-3 h-100 d-flex flex-column justify-content-between border-gold" tabindex="0">
                 <div>
-                    <img src="~/img/ivan.jpg" class="img-fluid rounded mb-3 w-100" style="height: 300px; object-fit: cover;" alt="Geovany Iván">
+                    <div class="foto-equipo mb-3"><img src="~/img/ivan.jpg" alt="Geovany Iván" loading="lazy"></div>
                     <h4 class="text-white fw-bold mb-1">Geovany Iván</h4>
                     <small class="brand-gold text-uppercase fw-bold d-block mb-3" style="letter-spacing: 1px;">CUIDADO INTEGRAL</small>
                     <p class="text-white-50 small">Especialista en mantenimiento de barba completa, perfilado con navaja y masajes capilares.</p>

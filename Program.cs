@@ -1,45 +1,66 @@
 using Lumina_Reserve_2.Models;
 using Lumina_Reserve_2.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. INYECCIÓN DE LA BASE DE DATOS
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var cadena = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Falta ConnectionStrings:DefaultConnection en appsettings.json o User Secrets.");
 
-// 2. INYECCIÓN DEL SERVICIO DE TELEGRAM (Actualizado con HttpClient para las peticiones a la API)
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(cadena));
+
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<PasswordService>();
+builder.Services.AddSingleton<ImagenService>();
 builder.Services.AddHttpClient<TelegramService>();
-
-// 2.1. INYECCIÓN DEL SERVICIO EN SEGUNDO PLANO PARA RECORDATORIOS
 builder.Services.AddHostedService<RecordatorioCitasService>();
-
-// 2.2. INYECCIÓN DEL SERVICIO EN SEGUNDO PLANO PARA ESCUCHAR EL BOT DE TELEGRAM
 builder.Services.AddHostedService<TelegramBotListenerService>();
+builder.Services.AddScoped<ReportesAdminService>();
+builder.Services.AddSingleton<ExportadorReportes>();
+builder.Services.AddHostedService<ResumenDiarioService>();
 
-// 3. CONFIGURACIÓN DE AUTENTICACIÓN
+// QuestPDF (exportación del reporte a PDF): licencia Community, gratuita para
+// proyectos y empresas con ingresos anuales menores a 1 millón de dólares.
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Cuenta/Login";
         options.AccessDeniedPath = "/Cuenta/AccesoDenegado";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     });
 
-// Agregar controladores y vistas
 builder.Services.AddControllersWithViews();
+
+// Las claves que cifran la cookie de sesión y los tokens antifalsificación se guardan en
+// disco (App_Data/keys). En un hosting compartido (Somee/IIS) la app se reinicia seguido;
+// sin esto, cada reinicio cerraría la sesión de todos y los formularios fallarían.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "App_Data", "keys")))
+    .SetApplicationName("LuminaReserve");
 
 var app = builder.Build();
 
-// Configuración de tubería HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Seguridad:ForzarHttps -> redirige http:// a https:// (activar cuando el certificado SSL ya funcione).
+// Seguridad:Hsts -> además obliga al navegador a usar siempre https. Déjalo en false mientras el
+// certificado se renueve a mano (Somee gratis): si caduca con HSTS activo, el sitio queda bloqueado.
+if (app.Configuration.GetValue("Seguridad:ForzarHttps", app.Environment.IsDevelopment()))
+{
+    if (!app.Environment.IsDevelopment() && app.Configuration.GetValue("Seguridad:Hsts", false)) app.UseHsts();
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 
 app.UseRouting();

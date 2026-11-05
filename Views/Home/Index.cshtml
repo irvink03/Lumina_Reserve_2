@@ -1,38 +1,134 @@
 ﻿@{
     ViewData["Title"] = "Inicio";
+    ViewData["OcultarAgendarNav"] = true;
+}
+
+@section Head {
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 }
 
 <style>
-    .hero-section {
-        /* IMPORTANTE: Cambia 'fondo-barberia.jpg' por el nombre EXACTO de la imagen que tienes en tu carpeta wwwroot/img/ */
-        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.95)), url('/img/fondo-barberia.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        min-height: 85vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 2rem;
+    .home { --oro: #d4af37; --crema: #f2ead8; --linea: #1f1f1f; }
+    .home .serif { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; letter-spacing: 0; }
+    .home .eyebrow {
+        display: inline-flex; align-items: center; gap: .75rem;
+        color: var(--oro); font-size: .78rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase;
+    }
+    .home .eyebrow::before { content: ""; width: 36px; height: 1px; background: var(--oro); }
+
+    /* ---------- HERO ---------- */
+    .home .hero {
+        min-height: calc(100vh - 86px);
+        display: flex; align-items: center;
+        padding: 4rem 0;
+        background:
+            radial-gradient(ellipse 55% 65% at 85% 35%, rgba(212,175,55,.09), transparent 70%),
+            radial-gradient(ellipse 45% 55% at 0% 100%, rgba(212,175,55,.05), transparent 70%),
+            #0a0a0a;
+    }
+    .home .hero h1 {
+        color: var(--crema);
+        font-size: clamp(2.8rem, 6.4vw, 5.6rem);
+        line-height: 1.04; font-weight: 700; margin: 1.4rem 0 1.6rem;
+    }
+    .home .hero h1 em { color: var(--oro); font-style: italic; font-weight: 600; }
+    .home .hero p { color: rgba(255,255,255,.62); font-size: 1.1rem; line-height: 1.75; max-width: 580px; }
+    .home .btn-reservar {
+        display: inline-flex; align-items: center; gap: .7rem; margin-top: 1.5rem;
+        background: var(--oro); color: #0a0a0a; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+        font-size: .9rem; padding: 1.05rem 2.1rem; border-radius: 2px; text-decoration: none;
+        box-shadow: 0 10px 30px -10px rgba(212,175,55,.55);
+        transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .home .btn-reservar:hover { background: #e2c25a; color: #0a0a0a; transform: translateY(-2px); box-shadow: 0 16px 36px -12px rgba(212,175,55,.7); }
+
+    /* ---------- CONÓCENOS ---------- */
+    .home .conocenos { padding: 6.5rem 0; border-top: 1px solid var(--linea); background: #0d0d0d; }
+    .home .conocenos h2 { color: var(--crema); font-size: clamp(2rem, 3.6vw, 3rem); font-weight: 700; line-height: 1.15; margin: .8rem 0 0; }
+    .home .conocenos h2 em { color: var(--oro); font-style: italic; font-weight: 600; }
+    .home .conocenos .texto p { color: rgba(255,255,255,.66); font-size: 1.05rem; line-height: 1.85; }
+    .home .conocenos .firma { color: var(--oro); font-family: 'Playfair Display', Georgia, serif; font-style: italic; font-size: 1.15rem; margin-top: 1.5rem; }
+    .home .valores { margin-top: 4.5rem; border-top: 1px solid var(--linea); }
+    .home .valor { padding: 2.25rem 1.75rem 0 0; }
+    .home .valor .num { color: var(--oro); font-family: 'Playfair Display', Georgia, serif; font-size: 1rem; letter-spacing: .1em; }
+    .home .valor h3 { color: var(--crema); font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; margin: .6rem 0 .6rem; }
+    .home .valor p { color: rgba(255,255,255,.5); font-size: .95rem; line-height: 1.7; margin: 0; }
+
+    @@media (max-width: 991.98px) {
+        .home .hero { min-height: auto; padding: 4.5rem 0 5rem; }
+        .home .conocenos { padding: 4.5rem 0; }
+        .home .valores { margin-top: 3rem; }
     }
 </style>
 
-<div class="hero-section container-fluid">
-    <div class="row justify-content-center w-100">
-        <div class="col-lg-8">
-            <!-- Reduje el tamaño de display-3 a display-4 para que "LUMINA RESERVE" quede en una sola línea -->
-            <h1 class="display-4 fw-bold brand-gold mb-3" style="letter-spacing: 3px; white-space: nowrap;">LUMINA RESERVE</h1>
-            <p class="text-white fs-5 mb-4">Tu cita con el estilo, en el momento preciso</p>
-            <p class="text-white-50 mx-auto mb-5" style="max-width: 700px;">
-                La plataforma definitiva para gestionar tus citas en Tuxtla Gutiérrez. Evita llamadas, asegura tu lugar en nuestras sucursales Centro o Plaza, y vive la experiencia premium.
-            </p>
-            
-            <!-- Botones alineados horizontalmente -->
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a asp-controller="Citas" asp-action="Agendar" class="btn btn-gold-fill px-4 py-3 fw-bold">AGENDAR CITA AHORA</a>
-                <a asp-controller="Portafolio" asp-action="Portafolio" class="btn btn-dark-outline px-4 py-3 fw-bold text-white">VER PORTAFOLIO</a>
+<div class="home">
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+        <div class="container-xxl px-4 px-lg-5">
+            <div class="row">
+                <div class="col-lg-9 col-xl-8">
+                    <span class="eyebrow">Barbería premium · Tuxtla Gutiérrez</span>
+                    <h1 class="serif">El arte del corte,<br /><em>a tu hora.</em></h1>
+                    <p>
+                        Precisión, ritual y estilo en cada visita. Elige a tu barbero, reserva tu horario en segundos
+                        y llega directo a la silla: sin llamadas y sin esperas.
+                    </p>
+                    <a asp-controller="Citas" asp-action="Agendar" class="btn-reservar">
+                        Reservar mi cita <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
+
+    <!-- ================= CONÓCENOS ================= -->
+    <section class="conocenos">
+        <div class="container-xxl px-4 px-lg-5">
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <span class="eyebrow">Conócenos</span>
+                    <h2 class="serif">Una barbería <em>100% comprometida</em> contigo.</h2>
+                </div>
+                <div class="col-lg-7 texto">
+                    <p>
+                        Lumina Reserve nació en Tuxtla Gutiérrez con una idea sencilla: que cortarse el cabello vuelva
+                        a ser un momento para ti. Somos un equipo de barberos apasionados por el oficio, que combina
+                        las técnicas clásicas de la barbería tradicional con las tendencias que hoy marcan estilo.
+                    </p>
+                    <p>
+                        Cada cliente que se sienta en nuestra silla recibe toda nuestra atención: escuchamos lo que
+                        buscas, te recomendamos lo que mejor va con tu rostro y cuidamos cada detalle, desde el primer
+                        trazo hasta el último toque de navaja. Por eso respetamos tu tiempo: reservas en línea, llegas
+                        a tu hora y te atendemos sin esperas.
+                    </p>
+                    <p>
+                        No solo hacemos cortes; creamos confianza. Nuestro compromiso es que salgas de Lumina Reserve
+                        sintiéndote mejor de lo que entraste, cada vez.
+                    </p>
+                    <div class="firma">— El equipo de Lumina Reserve</div>
+                </div>
+            </div>
+
+            <div class="row valores">
+                <div class="col-md-4 valor">
+                    <span class="num">01</span>
+                    <h3>Precisión</h3>
+                    <p>Técnica depurada y herramientas profesionales para un acabado impecable en cada servicio.</p>
+                </div>
+                <div class="col-md-4 valor">
+                    <span class="num">02</span>
+                    <h3>Puntualidad</h3>
+                    <p>Tu cita es tu cita. Agenda en línea y te recibimos a la hora exacta que elegiste.</p>
+                </div>
+                <div class="col-md-4 valor">
+                    <span class="num">03</span>
+                    <h3>Experiencia</h3>
+                    <p>Un espacio cuidado, trato cercano y la atención que mereces de principio a fin.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>

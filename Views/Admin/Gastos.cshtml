@@ -1,0 +1,141 @@
+@model Lumina_Reserve_2.Models.GastosViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Gastos";
+    ViewData["AccionFiltro"] = "Gastos";
+    var f = Model.Filtro;
+    var r = Model.Resumen;
+    var mx = CultureInfo.CurrentCulture;
+    var urlActual = Context.Request.Path + Context.Request.QueryString;
+    string Moneda(decimal v) => v.ToString("C", mx);
+    var hoy = Lumina_Reserve_2.Services.Reloj.Hoy;
+    var fechaSugerida = hoy >= f.Desde && hoy <= f.Hasta ? hoy : f.Hasta;
+    var conceptos = new[] { "Renta del local", "Luz y agua", "Internet", "Productos y navajas", "Toallas y limpieza", "Sueldos", "Publicidad", "Mantenimiento" };
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin container-xxl py-4 px-3 px-lg-4">
+    <partial name="_AdminNav" model="@("Gastos")" />
+    <partial name="_FiltroAdmin" model="f" />
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="kpi">
+                <div class="label">Ingresos del periodo <i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="valor">@Moneda(r.Ingresos)</div>
+                <div class="detalle">@r.Completadas citas completadas</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="kpi">
+                <div class="label">Gastos del periodo <i class="fa-solid fa-receipt"></i></div>
+                <div class="valor">@Moneda(r.Gastos)</div>
+                <div class="detalle">@Model.Gastos.Count @(Model.Gastos.Count == 1 ? "registro" : "registros")</div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="kpi">
+                <div class="label">Utilidad neta <i class="fa-solid fa-scale-balanced"></i></div>
+                <div class="valor">@Moneda(r.Utilidad)</div>
+                <div class="detalle">
+                    @if (r.Utilidad >= 0)
+                    {
+                        <span class="chip ok"><i class="fa-solid fa-arrow-trend-up"></i> Ganancia</span>
+                    }
+                    else
+                    {
+                        <span class="chip bad"><i class="fa-solid fa-arrow-trend-down"></i> Pérdida</span>
+                    }
+                    @if (r.Ingresos > 0)
+                    {
+                        <span class="ms-1">Margen @((r.Utilidad / r.Ingresos).ToString("P0", mx))</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            <div class="admin-card">
+                <h2 class="mb-3">Registrar gasto</h2>
+                <form asp-action="GuardarGasto" method="post" class="form-admin">
+                    <input type="hidden" name="returnUrl" value="@urlActual" />
+                    <div class="mb-3">
+                        <label for="sucursalId" class="d-block">Sucursal</label>
+                        <select id="sucursalId" name="sucursalId" class="form-select form-dark-control">
+                            @foreach (var s in f.Sucursales)
+                            {
+                                <option value="@s.SucursalId" selected="@(s.SucursalId == f.SucursalId)">@s.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="concepto" class="d-block">Concepto</label>
+                        <input id="concepto" name="concepto" list="conceptosSugeridos" class="form-control form-dark-control" maxlength="150" minlength="3" required placeholder="Ej. Renta del local" />
+                        <datalist id="conceptosSugeridos">
+                            @foreach (var c in conceptos) { <option value="@c"></option> }
+                        </datalist>
+                    </div>
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <label for="monto" class="d-block">Monto ($)</label>
+                            <input id="monto" name="monto" type="number" step="0.01" min="0.01" max="9999999" class="form-control form-dark-control" required placeholder="0.00" />
+                        </div>
+                        <div class="col-6">
+                            <label for="fecha" class="d-block">Fecha</label>
+                            <input id="fecha" name="fecha" type="date" class="form-control form-dark-control" value="@fechaSugerida.ToString("yyyy-MM-dd")" required style="color-scheme: dark;" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-gold-fill w-100 py-2">Guardar gasto</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h2>Gastos registrados</h2>
+                    <span class="sub">@f.SucursalNombre · @f.Etiqueta</span>
+                </div>
+                @if (Model.Gastos.Count == 0)
+                {
+                    <div class="vacio"><i class="fa-solid fa-receipt d-block fs-3 mb-2"></i>No hay gastos registrados en este periodo.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="tabla">
+                            <thead><tr><th>Fecha</th><th>Concepto</th><th class="num">Monto</th><th class="text-end">Acción</th></tr></thead>
+                            <tbody>
+                                @foreach (var g in Model.Gastos)
+                                {
+                                    <tr>
+                                        <td style="white-space: nowrap;">@g.Fecha.ToString("dd/MM/yyyy")</td>
+                                        <td>@g.Concepto</td>
+                                        <td class="num">@Moneda(g.Monto)</td>
+                                        <td>
+                                            <div class="acciones">
+                                                <form asp-action="EliminarGasto" method="post" data-confirmar="¿Eliminar el gasto «@g.Concepto» de @Moneda(g.Monto)?" onsubmit="return confirm(this.dataset.confirmar);">
+                                                    <input type="hidden" name="gastoId" value="@g.GastoId" />
+                                                    <input type="hidden" name="returnUrl" value="@urlActual" />
+                                                    <button type="submit" class="btn-accion eliminar" title="Eliminar gasto" aria-label="Eliminar gasto"><i class="fa-solid fa-trash-can"></i></button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr><td colspan="2" class="text-end" style="color: var(--a-ink-2);"><b>Total</b></td><td class="num"><b>@Moneda(Model.Gastos.Sum(g => g.Monto))</b></td><td></td></tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -27,15 +27,8 @@ namespace Lumina_Reserve_2.Models
         public virtual DbSet<Sucursale> Sucursales { get; set; }
         public virtual DbSet<Usuario> Usuarios { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-#pragma warning disable CS1030
-                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS; Database=LuminaReserveDB; User Id=SA; Password=2811; TrustServerCertificate=True;");
-#pragma warning restore CS1030
-            }
-        }
+        // La cadena de conexión se configura en Program.cs (ConnectionStrings:DefaultConnection).
+        // No se deja una cadena con credenciales aquí porque este archivo sí se sube a git.
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

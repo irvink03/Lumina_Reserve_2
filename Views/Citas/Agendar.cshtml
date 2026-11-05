@@ -3,6 +3,21 @@
     ViewData["Title"] = "Agendar Cita";
     string cortePreset = ViewBag.CorteSeleccionado as string ?? "";
     bool hayCorte = !string.IsNullOrEmpty(cortePreset);
+    var sucursales = ViewBag.SucursalesList as List<Lumina_Reserve_2.Models.Sucursale> ?? new();
+    var barberos = ViewBag.BarberosList as List<Lumina_Reserve_2.Models.Empleado> ?? new();
+    var cortes = ViewBag.CortesList as List<Lumina_Reserve_2.Models.Corte> ?? new();
+
+    // El catálogo (tabla Cortes) no tiene columna de categoría: se agrupa por el nombre del servicio.
+    (int Orden, string Id, string Titulo) Categoria(string nombre)
+    {
+        var n = nombre.ToLowerInvariant();
+        if (n.Contains("paquete") || n.Contains("combo")) return (4, "combos", "Paquetes y Combos");
+        if (n.Contains("masaje") || n.Contains("facial") || n.Contains("tratamiento")) return (3, "masajes", "Tratamientos y Masajes");
+        if (n.Contains("barba") || n.Contains("perfilado") || n.Contains("afeitado")) return (2, "barba", "Barba");
+        return (1, "cortes", "Cortes en Tendencia");
+    }
+    var grupos = cortes.GroupBy(c => Categoria(c.Nombre)).OrderBy(g => g.Key.Orden).ToList();
+    var sucursalInicial = sucursales.FirstOrDefault()?.Nombre ?? "--";
 }
 <style>
     .agendar-page {
@@ -236,18 +251,22 @@
                     <div class="campo">
                         <span class="campo-label">Elige tu sucursal</span>
                         <div class="sucursal-grid">
-                            <label class="sucursal-btn" for="sucCentro">
-                                <input class="form-check-input" type="radio" name="SucursalId" id="sucCentro" value="1" data-nombre="Centro" checked>
-                                Centro
-                            </label>
-                            <label class="sucursal-btn" for="sucPlaza">
-                                <input class="form-check-input" type="radio" name="SucursalId" id="sucPlaza" value="2" data-nombre="Plaza">
-                                Plaza
-                            </label>
+                            @for (var s = 0; s < sucursales.Count; s++)
+                            {
+                                var suc = sucursales[s];
+                                <label class="sucursal-btn" for="suc@(suc.SucursalId)">
+                                    <input class="form-check-input" type="radio" name="SucursalId" id="suc@(suc.SucursalId)" value="@suc.SucursalId" data-nombre="@suc.Nombre" @(s == 0 ? "checked" : "")>
+                                    @suc.Nombre
+                                </label>
+                            }
                         </div>
                         <div class="lista-barberos">
-                            <b>Centro:</b> Irvin, Fernando, Geovany<br />
-                            <b>Plaza:</b> Diego, Erick
+                            @foreach (var suc in sucursales)
+                            {
+                                var nombres = barberos.Where(b => b.SucursalId == suc.SucursalId && b.Usuario != null)
+                                                      .Select(b => b.Usuario.Nombre.Split(' ')[0]);
+                                <b>@suc.Nombre:</b> @string.Join(", ", nombres)<br />
+                            }
                         </div>
                     </div>
 
@@ -297,257 +316,45 @@
                     <h2 class="paso-titulo">2. Selecciona tus servicios</h2>
                     
                     <div class="accordion servicios-accordion" id="accordionServicios">
-                        <div class="accordion-item">
-                            <h3 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-cortes" aria-expanded="true">
-                                    Cortes en Tendencia
-                                </button>
-                            </h3>
-                            <div id="flush-cortes" class="accordion-collapse collapse show" data-bs-parent="#accordionServicios">
-                                <div class="accordion-body">
-                                    @if (hayCorte)
-                                    {
-                                        <span class="badge-corte mb-2"><i class="fa-solid fa-check"></i> Corte pre-seleccionado: @cortePreset</span>
-                                    }
-                                    <label class="servicio-row" for="corte1">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte1" value="1" data-nombre="Skin Fade" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Skin Fade</span>
-                                                <small class="text-white-50">Desvanecido impecable hasta la piel.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte2">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte2" value="2" data-nombre="Low Fade" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Low Fade</span>
-                                                <small class="text-white-50">Degradado bajo manteniendo oscuridad.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte3">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte3" value="3" data-nombre="Burst Fade" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Burst Fade</span>
-                                                <small class="text-white-50">Desvanecido semicircular en los laterales.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte4">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte4" value="4" data-nombre="High Fade" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">High Fade</span>
-                                                <small class="text-white-50">Degradado comienza en la parte alta de la cabeza.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte5">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte5" value="5" data-nombre="Taper Fade" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Taper Fade</span>
-                                                <small class="text-white-50">Desvanecido natural solo en patillas y nuca.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte6">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte6" value="6" data-nombre="Buzz Cut" data-precio="150">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Buzz Cut</span>
-                                                <small class="text-white-50">Corte militar uniforme con máquina.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$150.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte7">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte7" value="7" data-nombre="Textured Crop" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Textured Crop</span>
-                                                <small class="text-white-50">Flequillo recto hacia adelante con textura superior.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte8">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte8" value="8" data-nombre="Quiff Texturizado" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Quiff Texturizado</span>
-                                                <small class="text-white-50">Volumen en la parte frontal peinado hacia arriba.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte9">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte9" value="9" data-nombre="Modern Mullet" data-precio="200">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Modern Mullet</span>
-                                                <small class="text-white-50">Laterales cortos con caída de longitud en la nuca.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$200.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte10">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte10" value="10" data-nombre="Caesar Cut" data-precio="180">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Caesar Cut</span>
-                                                <small class="text-white-50">Clásico atemporal de flequillo recto y corto.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$180.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte11">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte11" value="11" data-nombre="Wolf Cut" data-precio="200">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Wolf Cut</span>
-                                                <small class="text-white-50">Híbrido entre el shag y el mullet con gran volumen.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$200.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="corte12">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="corte12" value="12" data-nombre="Corte Permanente" data-precio="250">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Corte Permanente (Zoomer)</span>
-                                                <small class="text-white-50">Rulos definidos en la parte superior con laterales cortos.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$250.00</span>
-                                    </label>
+                        @if (cortes.Count == 0)
+                        {
+                            <p class="text-white-50 small mb-0">No hay servicios disponibles por el momento.</p>
+                        }
+                        @{ var primera = true; }
+                        @foreach (var grupo in grupos)
+                        {
+                            var idGrupo = "flush-" + grupo.Key.Id;
+                            <div class="accordion-item">
+                                <h3 class="accordion-header">
+                                    <button class="accordion-button @(primera ? "" : "collapsed")" type="button" data-bs-toggle="collapse" data-bs-target="#@idGrupo" aria-expanded="@(primera ? "true" : "false")">
+                                        @grupo.Key.Titulo
+                                    </button>
+                                </h3>
+                                <div id="@idGrupo" class="accordion-collapse collapse @(primera ? "show" : "")" data-bs-parent="#accordionServicios">
+                                    <div class="accordion-body">
+                                        @if (primera && hayCorte)
+                                        {
+                                            <span class="badge-corte mb-2"><i class="fa-solid fa-check"></i> Corte pre-seleccionado: @cortePreset</span>
+                                        }
+                                        @foreach (var c in grupo)
+                                        {
+                                            <label class="servicio-row" for="corte@(c.CorteId)">
+                                                <div class="check-wrapper">
+                                                    <input class="form-check-input servicio-check" type="checkbox" id="corte@(c.CorteId)" value="@c.CorteId"
+                                                           data-nombre="@c.Nombre" data-precio="@c.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                                    <div>
+                                                        <span class="text-white fw-bold d-block">@c.Nombre</span>
+                                                        <small class="text-white-50">@(string.IsNullOrWhiteSpace(c.Descripcion) ? $"{c.DuracionMinutos} min aprox." : c.Descripcion)</small>
+                                                    </div>
+                                                </div>
+                                                <span class="text-warning fw-bold">@c.Precio.ToString("C")</span>
+                                            </label>
+                                        }
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <h3 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-barba" aria-expanded="false">
-                                    Arreglo de Barba
-                                </button>
-                            </h3>
-                            <div id="flush-barba" class="accordion-collapse collapse" data-bs-parent="#accordionServicios">
-                                <div class="accordion-body">
-                                    <label class="servicio-row" for="barba1">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="barba1" value="13" data-nombre="Perfilado Clásico" data-precio="100">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Perfilado Clásico</span>
-                                                <small class="text-white-50">Mantenimiento con navaja y toalla caliente.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$100.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="barba2">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="barba2" value="14" data-nombre="Barba Premium" data-precio="150">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Barba Premium</span>
-                                                <small class="text-white-50">Vapor ozono, exfoliación y pigmentación (opcional).</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$150.00</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <h3 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-masajes" aria-expanded="false">
-                                    Masajes y Faciales
-                                </button>
-                            </h3>
-                            <div id="flush-masajes" class="accordion-collapse collapse" data-bs-parent="#accordionServicios">
-                                <div class="accordion-body">
-                                    <label class="servicio-row" for="masaje1">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="masaje1" value="15" data-nombre="Tratamiento Facial" data-precio="150">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Tratamiento Facial</span>
-                                                <small class="text-white-50">Limpieza profunda y mascarilla negra relajante.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$150.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="masaje2">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="masaje2" value="16" data-nombre="Masaje Relajante" data-precio="120">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Masaje Relajante</span>
-                                                <small class="text-white-50">Masaje capilar y facial antiestrés con aceites esenciales.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$120.00</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="accordion-item">
-                            <h3 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-combos" aria-expanded="false">
-                                    Combos Especiales
-                                </button>
-                            </h3>
-                            <div id="flush-combos" class="accordion-collapse collapse" data-bs-parent="#accordionServicios">
-                                <div class="accordion-body">
-                                    <label class="servicio-row" for="combo1">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="combo1" value="17" data-nombre="Paquete Premium" data-precio="450">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Paquete Premium</span>
-                                                <small class="text-white-50">Corte + Barba Premium + Tratamiento Facial.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$450.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="combo2">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="combo2" value="18" data-nombre="Paquete Ejecutivo" data-precio="250">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Paquete Ejecutivo</span>
-                                                <small class="text-white-50">Corte en Tendencia + Perfilado Clásico de Barba.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$250.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="combo3">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="combo3" value="19" data-nombre="Paquete Relax" data-precio="280">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Paquete Relax</span>
-                                                <small class="text-white-50">Corte en Tendencia + Masaje Relajante.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$280.00</span>
-                                    </label>
-                                    <label class="servicio-row" for="combo4">
-                                        <div class="check-wrapper">
-                                            <input class="form-check-input servicio-check" type="checkbox" id="combo4" value="20" data-nombre="Paquete Spa" data-precio="280">
-                                            <div>
-                                                <span class="text-white fw-bold d-block">Paquete Spa</span>
-                                                <small class="text-white-50">Barba Premium + Tratamiento Facial.</small>
-                                            </div>
-                                        </div>
-                                        <span class="text-warning fw-bold">$280.00</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
+                            primera = false;
+                        }
                     </div>
 
                     <h2 class="paso-titulo segundo">3. Fecha, hora y pago</h2>
@@ -580,7 +387,7 @@
                     <dl class="resumen-lista">
                         <div class="resumen-item">
                             <dt class="resumen-label">Sucursal</dt>
-                            <dd class="resumen-valor" id="resSucursal">Centro</dd>
+                            <dd class="resumen-valor" id="resSucursal">@sucursalInicial</dd>
                         </div>
                         <div class="resumen-item">
                             <dt class="resumen-label">Barbero seleccionado</dt>
@@ -629,7 +436,7 @@
             const resFechaHora = document.getElementById('resFechaHora');
             const resPago = document.getElementById('resPago');
             const resTotal = document.getElementById('resTotal');
-            const presetValue = "@cortePreset";
+            const presetValue = @Json.Serialize(cortePreset);
 
             let horasOcupadasServidor = [];
 
@@ -651,7 +458,7 @@
             }
 
             function filtrarBarberos() {
-                const suc = sucursalActual().value;
+                const suc = sucursalActual() ? sucursalActual().value : '0';
                 Array.from(selBarbero.options).forEach(opt => {
                     const s = opt.dataset.sucursal;
                     const visible = (s === '0' || s === suc);
@@ -664,12 +471,14 @@
             }
 
             function consultarDisponibilidadBD() {
-                const barberoVal = selBarbero.value || "0"; 
+                const barberoVal = selBarbero.value || "0";
                 const fechaVal = inFecha.value;
+                const sucursalVal = sucursalActual() ? sucursalActual().value : "0";
 
                 if (!fechaVal) return;
 
-                fetch(`/Citas/ObtenerHorariosOcupados?empleadoId=${barberoVal}&fecha=${fechaVal}`)
+                const qs = new URLSearchParams({ empleadoId: barberoVal, fecha: fechaVal, sucursalId: sucursalVal });
+                fetch(`@Url.Action("ObtenerHorariosOcupados", "Citas")?${qs}`)
                     .then(response => response.json())
                     .then(data => {
                         horasOcupadasServidor = data || [];
@@ -687,7 +496,9 @@
                 } else if (h && inFecha.value === hoyTexto && h <= pad(ahora.getHours()) + ':' + pad(ahora.getMinutes())) {
                     mensaje = "Esa hora ya pasó. Elige una hora posterior.";
                 } else if (h && horasOcupadasServidor.includes(h)) {
-                    mensaje = `El barbero seleccionado ya tiene una cita reservada a las ${h}. Por favor elige otro horario.`;
+                    mensaje = selBarbero.value !== "0"
+                        ? `El barbero seleccionado ya tiene una cita reservada a las ${h}. Por favor elige otro horario.`
+                        : `Todos los barberos de esta sucursal están ocupados a las ${h}. Por favor elige otro horario.`;
                 }
 
                 inHora.setCustomValidity(""); 
@@ -702,7 +513,7 @@
             }
 
             function actualizarResumen() {
-                resSucursal.textContent = sucursalActual().dataset.nombre;
+                resSucursal.textContent = sucursalActual() ? sucursalActual().dataset.nombre : '--';
                 resBarbero.textContent = selBarbero.options[selBarbero.selectedIndex].text;
                 resPago.textContent = selPago.options[selPago.selectedIndex].text;
                 resFechaHora.textContent = textoFechaHora();

@@ -1,3 +1,4 @@
+@model Lumina_Reserve_2.Models.Usuario
 @{
     ViewData["Title"] = "Registro de Usuario";
 }
@@ -16,22 +17,22 @@
                 <form asp-action="Registro" method="post">
                     <div class="mb-3">
                         <label class="form-label text-white-50 small">Nombre Completo</label>
-                        <input type="text" name="Nombre" class="form-control bg-dark text-white border-secondary" placeholder="Tu nombre" required />
+                        <input type="text" name="Nombre" value="@Model?.Nombre" class="form-control bg-dark text-white border-secondary" placeholder="Tu nombre" required />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label text-white-50 small">Correo Electrónico</label>
-                        <input type="email" name="Correo" class="form-control bg-dark text-white border-secondary" placeholder="tucorreo@email.com" required />
+                        <input type="email" name="Correo" value="@Model?.Correo" class="form-control bg-dark text-white border-secondary" placeholder="tucorreo@email.com" required />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label text-white-50 small">Teléfono (WhatsApp)</label>
-                        <input type="tel" name="Telefono" class="form-control bg-dark text-white border-secondary" placeholder="9611234567" required />
+                        <input type="tel" name="Telefono" value="@Model?.Telefono" class="form-control bg-dark text-white border-secondary" placeholder="9611234567" required />
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label text-white-50 small">Contraseña</label>
-                        <input type="password" name="PasswordHash" class="form-control bg-dark text-white border-secondary" placeholder="********" required />
+                        <input type="password" name="PasswordHash" minlength="8" class="form-control bg-dark text-white border-secondary" placeholder="********" required />
                     </div>
 
                     <div class="p-3 mb-4 rounded" style="background-color: #161616; border: 1px solid #332d18;">

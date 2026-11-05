@@ -1,6 +1,6 @@
+using Lumina_Reserve_2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Lumina_Reserve_2.Models;
 
 namespace Lumina_Reserve_2.Controllers
 {
@@ -15,7 +15,11 @@ namespace Lumina_Reserve_2.Controllers
 
         public async Task<IActionResult> Portafolio()
         {
-            var cortes = await _context.Cortes.ToListAsync();
+            var cortes = await _context.Cortes
+                .AsNoTracking()
+                .Where(c => c.Estado != false)
+                .OrderBy(c => c.CorteId)
+                .ToListAsync();
             return View(cortes);
         }
     }

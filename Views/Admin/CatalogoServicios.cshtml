@@ -1,97 +1,115 @@
 @model IEnumerable<Lumina_Reserve_2.Models.Corte>
-
+@using System.Globalization
 @{
     ViewData["Title"] = "Gestión de Catálogo";
+    var activos = Model.Count(c => c.Estado != false);
 }
 
-<div class="container mt-5 pt-3">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-white">GESTIÓN DE <span class="brand-gold">CATÁLOGO Y CORTES</span></h2>
-        <a asp-action="Dashboard" class="btn btn-dark-outline fw-bold">← Volver al Dashboard</a>
-    </div>
+@section Head {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
 
-    @if (TempData["ExitoAdmin"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            @TempData["ExitoAdmin"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+<div class="admin container-xxl py-4 px-3 px-lg-4">
+    <partial name="_AdminNav" model="@("CatalogoServicios")" />
 
-    <div class="row g-4">
+    <div class="row g-3">
         <!-- Formulario de Edición / Registro -->
-        <div class="col-md-4">
-            <div class="dark-card p-4">
-                <h4 class="text-white fw-bold mb-3" id="formTitle">Agregar Nuevo Servicio</h4>
-                <form asp-action="GuardarCorte" method="post">
+        <div class="col-12 col-lg-4">
+            <div class="admin-card">
+                <h2 class="mb-3" id="formTitle">Agregar nuevo servicio</h2>
+                <form asp-action="GuardarCorte" method="post" class="form-admin">
                     <input type="hidden" id="corteId" name="corteId" value="0" />
 
                     <div class="mb-3">
-                        <label class="form-label text-white-50 small">Nombre del Servicio</label>
-                        <input type="text" id="nombre" name="nombre" class="form-control form-dark-control" required placeholder="Ej. Corte Clásico" />
+                        <label for="nombre" class="d-block">Nombre del servicio</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control form-dark-control" required maxlength="100" placeholder="Ej. Corte Clásico" />
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-white-50 small">Precio ($)</label>
-                        <input type="number" step="0.01" id="precio" name="precio" class="form-control form-dark-control" required placeholder="180.00" />
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="precio" class="d-block">Precio ($)</label>
+                            <input type="number" step="0.01" min="1" id="precio" name="precio" class="form-control form-dark-control" required placeholder="180.00" />
+                        </div>
+                        <div class="col-6">
+                            <label for="duracionMinutos" class="d-block">Duración (min)</label>
+                            <input type="number" step="5" min="5" max="300" id="duracionMinutos" name="duracionMinutos" class="form-control form-dark-control" value="30" required />
+                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-white-50 small">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" class="form-control form-dark-control" rows="3" placeholder="Detalles del corte..."></textarea>
+                    <div class="mb-4">
+                        <label for="descripcion" class="d-block">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control form-dark-control" rows="3" maxlength="255" placeholder="Detalles del corte..."></textarea>
                     </div>
 
-                    <button type="submit" id="btnGuardar" class="btn btn-gold-fill w-100 fw-bold py-2">Guardar Servicio</button>
-                    <button type="button" onclick="limpiarFormulario()" class="btn btn-dark-outline w-100 fw-bold mt-2 py-2">Limpiar Campos</button>
+                    <button type="submit" id="btnGuardar" class="btn btn-gold-fill w-100 py-2">Guardar servicio</button>
+                    <button type="button" onclick="limpiarFormulario()" class="btn btn-dark-outline w-100 fw-bold mt-2 py-2">Limpiar campos</button>
                 </form>
+                <p class="tenue mt-3 mb-0" style="font-size: .78rem; color: var(--a-ink-3);">
+                    La duración se usa al agendar para calcular si el barbero está libre.
+                </p>
             </div>
         </div>
 
-        <!-- Tabla con lista de cortes desde SQL Server -->
-        <div class="col-md-8">
-            <div class="dark-card p-4">
-                <h4 class="text-white fw-bold mb-3">Servicios Registrados en BD</h4>
+        <!-- Tabla con lista de cortes -->
+        <div class="col-12 col-lg-8">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h2>Servicios registrados</h2>
+                    <span class="sub">@activos activos de @Model.Count()</span>
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-dark table-hover align-middle">
+                    <table class="tabla">
                         <thead>
-                            <tr class="brand-gold">
+                            <tr>
                                 <th>ID</th>
                                 <th>Servicio</th>
-                                <th>Precio</th>
-                                <th>Descripción</th>
-                                <th>Acción</th>
+                                <th class="num">Precio</th>
+                                <th class="num">Duración</th>
+                                <th>Estado</th>
+                                <th class="text-end">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model != null && Model.Any())
+                            @if (Model.Any())
                             {
-                                @foreach (var corte in Model)
+                                foreach (var corte in Model)
                                 {
-                                    <tr>
-                                        <td>@corte.CorteId</td>
-                                        <td class="fw-bold text-white">@corte.Nombre</td>
-                                        <td class="brand-gold fw-bold">$@corte.Precio.ToString("N2")</td>
-                                        <td class="text-white-50 small">@corte.Descripcion</td>
+                                    var activo = corte.Estado != false;
+                                    <tr class="@(activo ? "" : "inactivo")">
+                                        <td class="tenue">@corte.CorteId</td>
                                         <td>
-                                            <button type="button" 
-                                                    class="btn btn-sm btn-warning fw-bold btn-seleccionar"
-                                                    data-id="@corte.CorteId"
-                                                    data-nombre="@corte.Nombre"
-                                                    data-precio="@corte.Precio"
-                                                    data-descripcion="@corte.Descripcion">
-                                                Seleccionar
-                                            </button>
+                                            <b>@corte.Nombre</b>
+                                            @if (!string.IsNullOrWhiteSpace(corte.Descripcion)) { <div class="tenue">@corte.Descripcion</div> }
+                                        </td>
+                                        <td class="num">@corte.Precio.ToString("C", CultureInfo.CurrentCulture)</td>
+                                        <td class="num">@corte.DuracionMinutos min</td>
+                                        <td>
+                                            <form asp-action="CambiarEstadoCorte" method="post">
+                                                <input type="hidden" name="corteId" value="@corte.CorteId" />
+                                                <input type="hidden" name="activo" value="@((!activo).ToString().ToLower())" />
+                                                <button type="submit" class="switch-estado @(activo ? "on" : "")" title="@(activo ? "Desactivar: dejará de aparecer al agendar" : "Activar: volverá a aparecer al agendar")">
+                                                    <span class="punto"></span> @(activo ? "Activo" : "Inactivo")
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <div class="acciones">
+                                                <button type="button" class="btn-accion btn-seleccionar" title="Editar" aria-label="Editar @corte.Nombre"
+                                                        data-id="@corte.CorteId"
+                                                        data-nombre="@corte.Nombre"
+                                                        data-precio="@corte.Precio.ToString(CultureInfo.InvariantCulture)"
+                                                        data-duracion="@corte.DuracionMinutos"
+                                                        data-descripcion="@corte.Descripcion">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 }
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="5" class="text-center text-white-50 py-4">
-                                        No hay cortes o servicios registrados en la base de datos.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="6" class="vacio">No hay servicios registrados en la base de datos.</td></tr>
                             }
                         </tbody>
                     </table>
@@ -106,28 +124,28 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.btn-seleccionar').forEach(function (button) {
                 button.addEventListener('click', function () {
-                    var id = this.getAttribute('data-id');
-                    var nombre = this.getAttribute('data-nombre');
-                    var precio = this.getAttribute('data-precio');
-                    var descripcion = this.getAttribute('data-descripcion');
-
-                    document.getElementById('formTitle').innerText = "Modificar Servicio (ID: " + id + ")";
-                    document.getElementById('corteId').value = id;
-                    document.getElementById('nombre').value = nombre;
-                    document.getElementById('precio').value = precio;
-                    document.getElementById('descripcion').value = descripcion;
-                    document.getElementById('btnGuardar').innerText = "Actualizar Precio / Servicio";
+                    const d = this.dataset;
+                    document.getElementById('formTitle').innerText = "Modificar servicio (ID: " + d.id + ")";
+                    document.getElementById('corteId').value = d.id;
+                    document.getElementById('nombre').value = d.nombre;
+                    document.getElementById('precio').value = d.precio;
+                    document.getElementById('duracionMinutos').value = d.duracion;
+                    document.getElementById('descripcion').value = d.descripcion || "";
+                    document.getElementById('btnGuardar').innerText = "Actualizar servicio";
+                    document.getElementById('nombre').focus();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             });
         });
 
         function limpiarFormulario() {
-            document.getElementById('formTitle').innerText = "Agregar Nuevo Servicio";
+            document.getElementById('formTitle').innerText = "Agregar nuevo servicio";
             document.getElementById('corteId').value = "0";
             document.getElementById('nombre').value = "";
             document.getElementById('precio').value = "";
+            document.getElementById('duracionMinutos').value = "30";
             document.getElementById('descripcion').value = "";
-            document.getElementById('btnGuardar').innerText = "Guardar Servicio";
+            document.getElementById('btnGuardar').innerText = "Guardar servicio";
         }
     </script>
 }

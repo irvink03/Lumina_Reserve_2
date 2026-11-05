@@ -1,168 +1,395 @@
-@model IEnumerable<Lumina_Reserve_2.Models.Cita>
+@model Lumina_Reserve_2.Models.DashboardViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = "Dashboard Admin";
-    int sucursalActual = ViewBag.SucursalActual ?? 1;
+    ViewData["AccionFiltro"] = "Dashboard";
+    var f = Model.Filtro;
+    var r = Model.Resumen;
+    var mx = CultureInfo.CurrentCulture;
+    var esRango = f.Periodo == "rango";
+    var urlActual = Context.Request.Path + Context.Request.QueryString;
+
+    string Moneda(decimal v) => v.ToString("C0", mx);
+
+    string IconoEstado(string e) => e switch
+    {
+        "Pendiente" => "fa-hourglass-half",
+        "Confirmada" => "fa-calendar-check",
+        "Completada" => "fa-circle-check",
+        "Cancelada" => "fa-circle-xmark",
+        _ => "fa-circle"
+    };
+
+    // Escala "bonita" para el eje Y de la gráfica (1-2-5 x 10^n).
+    decimal EscalaMax(decimal max)
+    {
+        if (max <= 0) return 1000m;
+        var exp = Math.Pow(10, Math.Floor(Math.Log10((double)max)));
+        foreach (var m in new[] { 1d, 2d, 2.5d, 5d, 10d })
+            if (m * exp >= (double)max) return (decimal)(m * exp);
+        return (decimal)(10 * exp);
+    }
+    var maxIngreso = Model.IngresosPorDia.Count > 0 ? Model.IngresosPorDia.Max(d => d.Ingresos) : 0m;
+    var tope = EscalaMax(maxIngreso);
+    var paso = Model.IngresosPorDia.Count switch { <= 10 => 1, <= 20 => 2, <= 35 => 5, _ => 7 };
+    var maxServicio = Model.TopServicios.Count > 0 ? Model.TopServicios.Max(s => s.Veces) : 0;
+
+    var estados = new[] { ("Pendiente", r.Pendientes), ("Confirmada", r.Confirmadas), ("Completada", r.Completadas), ("Cancelada", r.Canceladas) };
+    var tasaCancelacion = r.CitasTotal > 0 ? (double)r.Canceladas / r.CitasTotal : 0;
 }
 
-<div class="container-fluid py-4">
-    <!-- ENCABEZADO -->
-    <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-            <h1 class="h3 text-white fw-bold mb-1">DASHBOARD ADMIN</h1>
-            <p class="text-white-50 m-0">Resumen financiero y operativo de Lumina Reserve.</p>
+@section Head {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin container-xxl py-4 px-3 px-lg-4">
+    <partial name="_AdminNav" model="@("Dashboard")" />
+    <partial name="_FiltroAdmin" model="f" />
+
+    <!-- Exportar el reporte del filtro actual + resumen diario por Telegram -->
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <a asp-action="ExportarExcel" asp-route-sucursalId="@f.SucursalId" asp-route-periodo="@f.Periodo"
+           asp-route-desde="@(esRango ? f.Desde.ToString("yyyy-MM-dd") : null)" asp-route-hasta="@(esRango ? f.Hasta.ToString("yyyy-MM-dd") : null)"
+           class="btn btn-sm btn-outline-light border-secondary"><i class="fa-solid fa-file-excel me-1" style="color: #2fb46e;"></i> Exportar Excel</a>
+        <a asp-action="ExportarPdf" asp-route-sucursalId="@f.SucursalId" asp-route-periodo="@f.Periodo"
+           asp-route-desde="@(esRango ? f.Desde.ToString("yyyy-MM-dd") : null)" asp-route-hasta="@(esRango ? f.Hasta.ToString("yyyy-MM-dd") : null)"
+           class="btn btn-sm btn-outline-light border-secondary"><i class="fa-solid fa-file-pdf me-1" style="color: #e5484d;"></i> Exportar PDF</a>
+        <form asp-action="EnviarResumenAhora" method="post" class="ms-md-auto">
+            <input type="hidden" name="returnUrl" value="@urlActual" />
+            <button type="submit" class="btn btn-sm btn-outline-light border-secondary" title="El resumen también se envía solo cada día a la hora configurada (ResumenDiario:Hora)">
+                <i class="fa-brands fa-telegram me-1" style="color: #3aa6d8;"></i> Enviar resumen de hoy a Telegram
+            </button>
+        </form>
+    </div>
+
+    <!-- ===================== KPIs ===================== -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Ingresos <i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="valor">@Moneda(r.Ingresos)</div>
+                <div class="detalle">Pagos completados</div>
+            </div>
         </div>
-        <div class="text-end">
-            <div class="text-warning fw-bold mb-2">@DateTime.Now.ToString("dd/MM/yyyy")</div>
-            <div class="text-white-50 small mb-2">Sucursal Activa: @(sucursalActual == 1 ? "Centro" : "Plaza")</div>
-            <div class="btn-group">
-                <a asp-action="CatalogoServicios" class="btn btn-outline-light border-secondary text-white">
-                    <i class="fa-solid fa-scissors me-1"></i> Catálogo
-                </a>
-                <a asp-action="Dashboard" asp-route-sucursalId="1" class="btn @(sucursalActual == 1 ? "btn-warning text-dark fw-bold" : "btn-dark border-secondary text-white")">Centro</a>
-                <a asp-action="Dashboard" asp-route-sucursalId="2" class="btn @(sucursalActual == 2 ? "btn-warning text-dark fw-bold" : "btn-dark border-secondary text-white")">Plaza</a>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Gastos <i class="fa-solid fa-receipt"></i></div>
+                <div class="valor">@Moneda(r.Gastos)</div>
+                <div class="detalle"><a asp-action="Gastos" asp-route-sucursalId="@f.SucursalId" asp-route-periodo="@f.Periodo"
+                                        asp-route-desde="@(esRango ? f.Desde.ToString("yyyy-MM-dd") : null)" asp-route-hasta="@(esRango ? f.Hasta.ToString("yyyy-MM-dd") : null)"
+                                        class="text-decoration-none" style="color: var(--a-gold);">Registrar gastos →</a></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Utilidad neta <i class="fa-solid fa-scale-balanced"></i></div>
+                <div class="valor">@Moneda(r.Utilidad)</div>
+                <div class="detalle">
+                    @if (r.Utilidad >= 0)
+                    {
+                        <span class="chip ok"><i class="fa-solid fa-arrow-trend-up"></i> Ganancia</span>
+                    }
+                    else
+                    {
+                        <span class="chip bad"><i class="fa-solid fa-arrow-trend-down"></i> Pérdida</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Citas <i class="fa-solid fa-calendar-days"></i></div>
+                <div class="valor">@r.CitasTotal</div>
+                <div class="detalle">@r.Completadas completadas · @((tasaCancelacion).ToString("P0", mx)) canceladas</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Ticket promedio <i class="fa-solid fa-ticket"></i></div>
+                <div class="valor">@Moneda(r.TicketPromedio)</div>
+                <div class="detalle">@r.ClientesUnicos @(r.ClientesUnicos == 1 ? "cliente" : "clientes") atendidos</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="kpi">
+                <div class="label">Calificación <i class="fa-solid fa-star"></i></div>
+                <div class="valor">@(r.CalificacionPromedio.HasValue ? r.CalificacionPromedio.Value.ToString("0.0", mx) + " ★" : "—")</div>
+                <div class="detalle">@r.TotalResenas @(r.TotalResenas == 1 ? "reseña" : "reseñas") en el periodo</div>
             </div>
         </div>
     </div>
 
-    <!-- TARJETAS SUPERIORES -->
-    <div class="row g-4 mb-4">
-        <!-- Ingresos Estimados -->
-        <div class="col-12 col-md-4">
-            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase text-white-50 small fw-bold">INGRESOS ESTIMADOS</span>
-                    <i class="fa-solid fa-money-bill-wave text-success fs-4"></i>
-                </div>
-                <h2 class="display-6 fw-bold mb-0 text-white">
-                    @string.Format("{0:C}", ViewBag.IngresosEstimados)
-                </h2>
-                <small class="text-success mt-2 d-block">
-                    <i class="fa-solid fa-arrow-up"></i> Conectado a BD
-                </small>
-            </div>
-        </div>
-
-        <!-- Citas en la Sucursal -->
-        <div class="col-12 col-md-4">
-            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase text-white-50 small fw-bold">CITAS EN LA SUCURSAL</span>
-                    <i class="fa-solid fa-calendar-check text-primary fs-4"></i>
-                </div>
-                <h2 class="display-6 fw-bold mb-0 text-white">
-                    @(Model?.Count() ?? 0)
-                </h2>
-                <small class="text-white-50 mt-2 d-block">Registros filtrados por SP</small>
-            </div>
-        </div>
-
-        <!-- Sistema Telegram -->
-        <div class="col-12 col-md-4">
-            <div class="card bg-dark border-secondary p-4 h-100 rounded-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase text-white-50 small fw-bold">SISTEMA TELEGRAM</span>
-                    <i class="fa-brands fa-telegram text-warning fs-4"></i>
-                </div>
-                <h2 class="display-6 fw-bold mb-0 text-white">Activo</h2>
-                <small class="text-white-50 mt-2 d-block">Notificaciones y recordatorios</small>
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN INFERIOR -->
-    <div class="row g-4">
-        <!-- Tabla de Citas (Izquierda) -->
+    <!-- ===================== GRÁFICA + ESTADOS ===================== -->
+    <div class="row g-3 mb-4">
         <div class="col-12 col-lg-8">
-            <div class="card bg-dark border-secondary p-4 rounded-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0 text-white fw-bold">Agenda Activa (Sucursal Seleccionada)</h5>
-                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">Stored Procedure Activo</span>
+            <div class="admin-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2">
+                    <h2>Ingresos por día</h2>
+                    <span class="sub">Pagos completados · @f.Etiqueta</span>
                 </div>
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover table-borderless align-middle mb-0">
-                        <thead>
-                            <tr class="border-bottom border-secondary text-white-50">
-                                <th class="pb-3">Cliente</th>
-                                <th class="pb-3">Barbero</th>
-                                <th class="pb-3">Fecha y Hora</th>
-                                <th class="pb-3">Estado</th>
-                                <th class="pb-3 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var cita in Model)
-                                {
-                                    <tr class="border-bottom border-secondary border-opacity-25">
-                                        <td class="py-3 text-white fw-bold">@(cita.Usuario?.Nombre ?? "Cliente de Paso")</td>
-                                        <td class="py-3 text-warning">@(cita.Empleado?.Usuario?.Nombre ?? "Sin asignar")</td>
-                                        <td class="py-3 text-white-50">@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td class="py-3">
-                                            <span class="badge rounded-pill @(cita.Estado == "Completada" ? "bg-success text-white" : (cita.Estado == "Cancelada" ? "bg-danger text-white" : "bg-warning text-dark")) px-3 py-2">
-                                                @cita.Estado
-                                            </span>
-                                        </td>
-                                        <td class="py-3 text-center">
-                                            @if (cita.Estado != "Completada" && cita.Estado != "Cancelada")
-                                            {
-                                                <div class="d-flex justify-content-center gap-2">
-                                                    <!-- Botón Completar -->
-                                                    <form asp-action="CambiarEstado" method="post" class="d-inline">
-                                                        <input type="hidden" name="citaId" value="@cita.CitaId" />
-                                                        <input type="hidden" name="estado" value="Completada" />
-                                                        <button type="submit" class="btn btn-sm btn-outline-success border-secondary text-success" title="Completar Cita">
-                                                            <i class="fa-solid fa-check"></i>
-                                                        </button>
-                                                    </form>
 
-                                                    <!-- MEJORA: Botón Cancelar -->
-                                                    <form asp-action="CambiarEstado" method="post" class="d-inline" onsubmit="return confirm('¿Deseas cancelar esta cita?');">
-                                                        <input type="hidden" name="citaId" value="@cita.CitaId" />
-                                                        <input type="hidden" name="estado" value="Cancelada" />
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger border-secondary text-danger" title="Cancelar Cita">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            }
-                                            else
+                @if (!Model.GraficaDisponible)
+                {
+                    <div class="vacio">Selecciona un periodo de hasta 2 meses para ver la gráfica diaria.</div>
+                }
+                else if (maxIngreso == 0)
+                {
+                    <div class="vacio"><i class="fa-regular fa-chart-bar d-block fs-3 mb-2"></i>Sin ingresos registrados en este periodo.</div>
+                }
+                else
+                {
+                    <div class="grafica" role="img" aria-label="Ingresos por día del @f.Etiqueta. Máximo @Moneda(maxIngreso).">
+                        @for (var i = 0; i <= 4; i++)
+                        {
+                            var v = tope * i / 4;
+                            <div class="linea-grid" style="bottom: @((i * 25).ToString(CultureInfo.InvariantCulture))%;"><span>@(v >= 1000 ? (v / 1000m).ToString("0.#", mx) + "K" : v.ToString("0", mx))</span></div>
+                        }
+                        <div class="columnas">
+                            @foreach (var d in Model.IngresosPorDia)
+                            {
+                                var alto = tope > 0 ? (double)(d.Ingresos / tope) * 100 : 0;
+                                <div class="slot" tabindex="0"
+                                     data-tip-titulo="@d.Dia.ToString("ddd dd/MM", mx)"
+                                     data-tip-valor="@Moneda(d.Ingresos)"
+                                     data-tip-extra="@d.Citas @(d.Citas == 1 ? "cita pagada" : "citas pagadas")"
+                                     aria-label="@d.Dia.ToString("dd/MM"): @Moneda(d.Ingresos)">
+                                    @if (d.Ingresos > 0)
+                                    {
+                                        <div class="barra" style="height: @alto.ToString("0.##", CultureInfo.InvariantCulture)%;"></div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="ejes-x" aria-hidden="true">
+                        @for (var i = 0; i < Model.IngresosPorDia.Count; i++)
+                        {
+                            <span>@(i % paso == 0 || i == Model.IngresosPorDia.Count - 1 ? Model.IngresosPorDia[i].Dia.ToString("dd") : "")</span>
+                        }
+                    </div>
+                    <details class="ver-tabla">
+                        <summary>Ver datos en tabla</summary>
+                        <table class="tabla mt-2">
+                            <thead><tr><th>Día</th><th class="num">Citas pagadas</th><th class="num">Ingresos</th></tr></thead>
+                            <tbody>
+                                @foreach (var d in Model.IngresosPorDia.Where(x => x.Ingresos > 0))
+                                {
+                                    <tr><td>@d.Dia.ToString("dddd dd/MM/yyyy", mx)</td><td class="num">@d.Citas</td><td class="num">@Moneda(d.Ingresos)</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </details>
+                }
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <h2>Estado de las citas</h2>
+                    <span class="sub">@r.CitasTotal en total</span>
+                </div>
+                <div class="mt-3">
+                    @foreach (var (nombre, cantidad) in estados)
+                    {
+                        var pct = r.CitasTotal > 0 ? (double)cantidad / r.CitasTotal * 100 : 0;
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="estado @nombre"><i class="fa-solid @IconoEstado(nombre)"></i> @nombre</span>
+                                <span style="color: var(--a-ink-2); font-variant-numeric: tabular-nums;">@cantidad <small style="color: var(--a-ink-3);">(@pct.ToString("0", mx)%)</small></span>
+                            </div>
+                            <div class="medidor"><span class="@nombre" style="width: @pct.ToString("0.##", CultureInfo.InvariantCulture)%;"></span></div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== AGENDA ===================== -->
+    <div class="admin-card mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div>
+                <h2>Agenda</h2>
+                <span class="sub">Primero las citas activas (más próximas arriba), luego el historial.</span>
+            </div>
+            <div class="chips-estado" role="group" aria-label="Filtrar por estado">
+                @foreach (var est in new string?[] { null, "Pendiente", "Confirmada", "Completada", "Cancelada" })
+                {
+                    <a asp-action="Dashboard" asp-route-sucursalId="@f.SucursalId" asp-route-periodo="@f.Periodo"
+                       asp-route-desde="@(esRango ? f.Desde.ToString("yyyy-MM-dd") : null)" asp-route-hasta="@(esRango ? f.Hasta.ToString("yyyy-MM-dd") : null)"
+                       asp-route-estado="@est" class="@(Model.EstadoFiltro == est ? "activo" : "")">@(est ?? "Todas")</a>
+                }
+            </div>
+        </div>
+
+        @if (Model.Agenda.Count == 0)
+        {
+            <div class="vacio"><i class="fa-regular fa-calendar-xmark d-block fs-3 mb-2"></i>No hay citas @(Model.EstadoFiltro != null ? $"en estado {Model.EstadoFiltro.ToLower()} " : "")en este periodo.</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Fecha y hora</th>
+                            <th>Cliente</th>
+                            <th>Barbero</th>
+                            <th>Servicios</th>
+                            <th class="num">Total</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Agenda)
+                        {
+                            <tr>
+                                <td style="white-space: nowrap;">
+                                    <b>@c.FechaHora.ToString("dd/MM/yyyy")</b> <span style="color: var(--a-ink-2);">@c.FechaHora.ToString("HH:mm")</span>
+                                    @if (c.Minutos > 0) { <div class="tenue">@c.Minutos min</div> }
+                                </td>
+                                <td>
+                                    <b>@c.Cliente</b>@if (!c.TieneCuenta) { <span class="badge-invitado">Invitado</span> }
+                                    @if (!string.IsNullOrWhiteSpace(c.Telefono))
+                                    {
+                                        <div class="tenue"><i class="fa-solid fa-phone me-1"></i><a href="tel:@c.Telefono" class="text-reset text-decoration-none">@c.Telefono</a></div>
+                                    }
+                                </td>
+                                <td style="white-space: nowrap;">@c.Barbero</td>
+                                <td class="tenue" style="max-width: 260px;">@(string.IsNullOrEmpty(c.Servicios) ? "—" : c.Servicios)</td>
+                                <td class="num">
+                                    @Moneda(c.Total)
+                                    @if (c.MetodoPago != null) { <div class="tenue">@(c.MetodoPago.StartsWith("Tarjeta") ? "Tarjeta" : "Efectivo") · @c.EstadoPago</div> }
+                                </td>
+                                <td><span class="estado @c.Estado"><i class="fa-solid @IconoEstado(c.Estado)"></i> @c.Estado</span></td>
+                                <td>
+                                    <div class="acciones">
+                                        @if (c.Activa)
+                                        {
+                                            if (c.Estado == "Pendiente")
                                             {
-                                                <button class="btn btn-sm btn-outline-secondary border-secondary text-secondary" disabled title="Cita finalizada">
-                                                    <i class="fa-solid fa-lock"></i>
-                                                </button>
+                                                <form asp-action="CambiarEstado" method="post">
+                                                    <input type="hidden" name="citaId" value="@c.CitaId" /><input type="hidden" name="estado" value="Confirmada" /><input type="hidden" name="returnUrl" value="@urlActual" />
+                                                    <button type="submit" class="btn-accion confirmar" title="Confirmar cita" aria-label="Confirmar cita"><i class="fa-solid fa-calendar-check"></i></button>
+                                                </form>
                                             }
-                                        </td>
+                                            <form asp-action="CambiarEstado" method="post">
+                                                <input type="hidden" name="citaId" value="@c.CitaId" /><input type="hidden" name="estado" value="Completada" /><input type="hidden" name="returnUrl" value="@urlActual" />
+                                                <button type="submit" class="btn-accion completar" title="Marcar como completada (registra el pago)" aria-label="Completar cita"><i class="fa-solid fa-check"></i></button>
+                                            </form>
+                                            <form asp-action="CambiarEstado" method="post" data-confirmar="¿Cancelar la cita de @c.Cliente del @c.FechaHora.ToString("dd/MM HH:mm")?" onsubmit="return confirm(this.dataset.confirmar);">
+                                                <input type="hidden" name="citaId" value="@c.CitaId" /><input type="hidden" name="estado" value="Cancelada" /><input type="hidden" name="returnUrl" value="@urlActual" />
+                                                <button type="submit" class="btn-accion cancelar" title="Cancelar cita" aria-label="Cancelar cita"><i class="fa-solid fa-xmark"></i></button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <span class="tenue" title="Cita finalizada"><i class="fa-solid fa-lock"></i></span>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- ===================== BARBEROS + SERVICIOS ===================== -->
+    <div class="row g-3">
+        <div class="col-12 col-lg-7">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h2>Rendimiento por barbero</h2>
+                    <a asp-action="PersonalAdmin" class="sub text-decoration-none">Gestionar personal →</a>
+                </div>
+                @if (Model.Barberos.Count == 0)
+                {
+                    <div class="vacio">No hay barberos en esta sucursal.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="tabla">
+                            <thead>
+                                <tr><th>Barbero</th><th class="num">Citas</th><th class="num">Completadas</th><th class="num">Canceladas</th><th class="num">Ingresos</th><th class="num">Calificación</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in Model.Barberos)
+                                {
+                                    <tr class="@(b.Activo ? "" : "inactivo")">
+                                        <td><b>@b.Nombre</b>@if (!b.Activo) { <span class="badge-invitado">Inactivo</span> }</td>
+                                        <td class="num">@b.Citas</td>
+                                        <td class="num">@b.Completadas</td>
+                                        <td class="num">@b.Canceladas</td>
+                                        <td class="num">@Moneda(b.Ingresos)</td>
+                                        <td class="num">@(b.Calificacion.HasValue ? $"{b.Calificacion.Value.ToString("0.0", mx)} ★" : "—") <span class="tenue">(@b.Resenas)</span></td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5" class="text-center text-white-50 py-5">No hay citas registradas para esta sucursal.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tenue mt-2" style="font-size: .75rem;">La calificación es histórica; el resto corresponde al periodo seleccionado.</div>
+                }
             </div>
         </div>
 
-        <!-- Panel de Rendimiento (Derecha) -->
-        <div class="col-12 col-lg-4">
-            <div class="card bg-dark border-secondary p-4 rounded-4 h-100">
-                <h5 class="mb-4 text-white fw-bold">Rendimiento Operativo</h5>
-                
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white">Base de Datos SQL</span>
-                    <span class="text-warning fw-bold">Conectado</span>
+        <div class="col-12 col-lg-5">
+            <div class="admin-card">
+                <div class="d-flex justify-content-between align-items-baseline mb-2">
+                    <h2>Servicios más vendidos</h2>
+                    <a asp-action="CatalogoServicios" class="sub text-decoration-none">Ver catálogo →</a>
                 </div>
-                <div class="w-100 bg-warning mb-4" style="height: 2px;"></div>
-                
-                <p class="text-white-50 lh-lg mb-0 small">
-                    Los datos fluyen mediante procedimientos almacenados (<code>sp_ObtenerCitasPorSucursal</code>) reflejando la información en tiempo real hacia la vista.
-                </p>
+                @if (Model.TopServicios.Count == 0)
+                {
+                    <div class="vacio">Sin servicios vendidos en este periodo.</div>
+                }
+                else
+                {
+                    foreach (var s in Model.TopServicios)
+                    {
+                        var pct = maxServicio > 0 ? (double)s.Veces / maxServicio * 100 : 0;
+                        <div class="hbar" title="@s.Nombre: @s.Veces @(s.Veces == 1 ? "vez" : "veces") · @Moneda(s.Monto)">
+                            <span class="nombre">@s.Nombre</span>
+                            <div class="pista">
+                                <span class="barra" style="width: calc((100% - 6.5rem) * @((pct / 100).ToString("0.###", CultureInfo.InvariantCulture)));"></span>
+                                <small><b style="color: var(--a-ink);">@s.Veces</b> · @Moneda(s.Monto)</small>
+                            </div>
+                        </div>
+                    }
+                    <div class="tenue mt-2" style="font-size: .75rem;">Veces vendido en citas no canceladas · monto a precio de lista.</div>
+                }
             </div>
         </div>
     </div>
+
+    <div class="tooltip-dato" id="tooltipDato" role="status" aria-live="polite"></div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const tip = document.getElementById('tooltipDato');
+            if (!tip) return;
+            function mostrar(el) {
+                const r = el.getBoundingClientRect();
+                tip.innerHTML = '<small>' + el.dataset.tipTitulo + '</small><b>' + el.dataset.tipValor + '</b><small>' + el.dataset.tipExtra + '</small>';
+                tip.style.left = (r.left + r.width / 2) + 'px';
+                const barra = el.querySelector('.barra');
+                tip.style.top = ((barra ? barra.getBoundingClientRect().top : r.bottom)) + 'px';
+                tip.style.display = 'block';
+            }
+            function ocultar() { tip.style.display = 'none'; }
+            document.querySelectorAll('.grafica .slot').forEach(el => {
+                el.addEventListener('mouseenter', () => mostrar(el));
+                el.addEventListener('focus', () => mostrar(el));
+                el.addEventListener('mouseleave', ocultar);
+                el.addEventListener('blur', ocultar);
+            });
+            window.addEventListener('scroll', ocultar, { passive: true });
+        })();
+    </script>
+}

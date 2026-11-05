@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@inject Lumina_Reserve_2.Services.ImagenService Imagenes
 <!DOCTYPE html>
 <html lang="es" data-bs-theme="dark">
 <head>
@@ -8,7 +9,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
     <style>
+        .marca-nav { font-size: 1.5rem; }
+        @@media (max-width: 575.98px) {
+            .marca-nav { font-size: 1.1rem; letter-spacing: 1px !important; margin-right: 0; }
+        }
         .custom-dropdown-item:hover {
             background-color: #262626 !important;
             color: #d4af37 !important;
@@ -18,45 +24,43 @@
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-nav-black py-3">
-            <div class="container-fluid px-4 px-lg-5">
-                <a class="navbar-brand brand-gold fs-4" asp-controller="Home" asp-action="Index">LUMINA RESERVE</a>
-                <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                
-                <div class="collapse navbar-collapse justify-content-center" id="navMain">
-                    <ul class="navbar-nav gap-lg-3 gap-2 py-2 py-lg-0 text-center">
-                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Home" asp-action="Index">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="NuestroEquipo">Equipo</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Portafolio" asp-action="Portafolio">Fotos / Trabajos</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="Ubicacion">Ubicación</a></li>
-                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Resenas" asp-action="Resenas">Reseñas</a></li>
-                    </ul>
-                </div>
+            <div class="container-fluid px-3 px-sm-4 px-lg-5">
+                <a class="navbar-brand brand-gold marca-nav" asp-controller="Home" asp-action="Index">LUMINA RESERVE</a>
 
-                <div class="d-flex align-items-center justify-content-center gap-3">
-                    <a class="btn btn-gold-outline btn-sm fw-bold text-nowrap" asp-controller="Citas" asp-action="Agendar">AGENDAR CITA</a>
-                    
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                @{
+                    var ocultarAgendar = ViewData["OcultarAgendarNav"] as bool? == true;
+                    var autenticado = User.Identity?.IsAuthenticated == true;
+                }
+
+                @* Acciones: en escritorio van al final; en celular quedan junto al logo (foto + botón de menú). *@
+                <div class="d-flex align-items-center gap-2 gap-lg-3 ms-auto ms-lg-0 order-lg-last">
+                    @* En el inicio el botón principal de reservar ya está en el hero; aquí se oculta para no duplicarlo. *@
+                    @if (!ocultarAgendar)
                     {
-                        var userName = User.Identity.Name ?? "Usuario";
-                        // Obtenemos el identificador limpio de las claims sin tocar la BD en el layout
-                        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "1";
+                        <a class="btn btn-gold-outline btn-sm fw-bold text-nowrap d-none d-lg-inline-block" asp-controller="Citas" asp-action="Agendar">AGENDAR CITA</a>
+                    }
+
+                    @if (autenticado)
+                    {
+                        var userName = User.Identity!.Name ?? "Usuario";
+                        var fotoPerfil = int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var uid)
+                            ? Imagenes.UrlPerfil(uid)
+                            : Lumina_Reserve_2.Services.ImagenService.AvatarPorDefecto;
                         var userRole = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role || c.Type.Contains("role"))?.Value ?? "Cliente";
 
                         <div class="dropdown">
                             <button class="btn btn-link text-white text-decoration-none dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <!-- FOTO DE PERFIL EN LA BARRA DE NAVEGACIÓN -->
-                                <img src="~/images/perfiles/@(userId).jpg" asp-append-version="true"
-                                     onerror="this.onerror=null; this.src='/images/default-user.png';" 
+                                <img src="@fotoPerfil"
+                                     onerror="this.onerror=null; this.src='@Lumina_Reserve_2.Services.ImagenService.AvatarPorDefecto';" 
                                      class="rounded-circle" style="width: 35px; height: 35px; object-fit: cover; border: 1px solid var(--gold);" alt="Usuario" />
-                                <span class="d-none d-md-inline">@userName</span>
+                                <span class="d-none d-lg-inline">@userName</span>
                             </button>
                             
                             <ul class="dropdown-menu dropdown-menu-end bg-dark-card border-secondary mt-2 shadow-lg" style="width: 250px; background-color: #141414;">
                                 <li class="px-3 py-2 border-bottom border-secondary mb-2 text-center">
-                                    <img src="~/images/perfiles/@(userId).jpg" asp-append-version="true"
-                                         onerror="this.onerror=null; this.src='/images/default-user.png';" 
+                                    <img src="@fotoPerfil"
+                                         onerror="this.onerror=null; this.src='@Lumina_Reserve_2.Services.ImagenService.AvatarPorDefecto';" 
                                          class="rounded-circle mb-2" style="width: 60px; height: 60px; object-fit: cover; border: 2px solid var(--gold);" alt="Usuario" />
                                     <strong class="text-white d-block">@userName</strong>
                                     <span class="badge border border-warning text-warning mt-1">@userRole.ToUpper()</span>
@@ -75,9 +79,38 @@
                     }
                     else
                     {
-                        <a class="text-white text-decoration-none small fw-bold me-2 text-nowrap" asp-controller="Cuenta" asp-action="Login">Iniciar Sesión</a>
-                        <a class="btn btn-gold-fill btn-sm fw-bold text-nowrap" asp-controller="Cuenta" asp-action="Registro">REGISTRARSE</a>
+                        <a class="text-white text-decoration-none small fw-bold me-2 text-nowrap d-none d-lg-inline" asp-controller="Cuenta" asp-action="Login">Iniciar Sesión</a>
+                        <a class="btn btn-gold-fill btn-sm fw-bold text-nowrap d-none d-lg-inline-block" asp-controller="Cuenta" asp-action="Registro">REGISTRARSE</a>
                     }
+
+                    <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Abrir menú">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                </div>
+
+                <div class="collapse navbar-collapse justify-content-center" id="navMain">
+                    <ul class="navbar-nav gap-lg-3 gap-1 pt-3 pt-lg-0 text-center">
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="NuestroEquipo">Equipo</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Portafolio" asp-action="Portafolio">Fotos / Trabajos</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Nosotros" asp-action="Ubicacion">Ubicación</a></li>
+                        <li class="nav-item"><a class="nav-link nav-link-custom" asp-controller="Resenas" asp-action="Resenas">Reseñas</a></li>
+                    </ul>
+
+                    @* Solo celular: botones dentro del menú desplegable *@
+                    <div class="d-lg-none d-grid gap-2 pt-3 mt-2 border-top border-secondary">
+                        @if (!ocultarAgendar)
+                        {
+                            <a class="btn btn-gold-fill fw-bold py-2" asp-controller="Citas" asp-action="Agendar">AGENDAR CITA</a>
+                        }
+                        @if (!autenticado)
+                        {
+                            <div class="d-flex gap-2">
+                                <a class="btn btn-dark-outline fw-bold py-2 flex-fill" asp-controller="Cuenta" asp-action="Login">INICIAR SESIÓN</a>
+                                <a class="btn btn-gold-outline fw-bold py-2 flex-fill" asp-controller="Cuenta" asp-action="Registro">REGISTRARSE</a>
+                            </div>
+                        }
+                    </div>
                 </div>
             </div>
         </nav>

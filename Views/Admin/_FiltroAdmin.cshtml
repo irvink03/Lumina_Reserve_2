@@ -1,0 +1,41 @@
+@model Lumina_Reserve_2.Models.FiltroAdmin
+@{
+    // La acción que recibe el filtro (Dashboard o Gastos) se pasa en ViewData["AccionFiltro"].
+    var accion = ViewData["AccionFiltro"] as string ?? "Dashboard";
+    var esRango = Model.Periodo == "rango";
+}
+<div class="filtros">
+    @if (Model.Sucursales.Count > 1)
+    {
+        <div class="segmentado" role="group" aria-label="Sucursal">
+            @foreach (var s in Model.Sucursales)
+            {
+                <a asp-action="@accion" asp-route-sucursalId="@s.SucursalId" asp-route-periodo="@Model.Periodo"
+                   asp-route-desde="@(esRango ? Model.Desde.ToString("yyyy-MM-dd") : null)"
+                   asp-route-hasta="@(esRango ? Model.Hasta.ToString("yyyy-MM-dd") : null)"
+                   class="@(s.SucursalId == Model.SucursalId ? "activo" : "")">
+                    <i class="fa-solid fa-store me-1"></i>@s.Nombre
+                </a>
+            }
+        </div>
+    }
+
+    <div class="segmentado" role="group" aria-label="Periodo">
+        @foreach (var (clave, texto) in Lumina_Reserve_2.Models.FiltroAdmin.Periodos)
+        {
+            <a asp-action="@accion" asp-route-sucursalId="@Model.SucursalId" asp-route-periodo="@clave"
+               class="@(Model.Periodo == clave ? "activo" : "")">@texto</a>
+        }
+    </div>
+
+    <form method="get" asp-action="@accion" class="rango">
+        <input type="hidden" name="sucursalId" value="@Model.SucursalId" />
+        <input type="hidden" name="periodo" value="rango" />
+        <input type="date" name="desde" value="@Model.Desde.ToString("yyyy-MM-dd")" aria-label="Desde" required />
+        <span style="color: var(--a-ink-3);">a</span>
+        <input type="date" name="hasta" value="@Model.Hasta.ToString("yyyy-MM-dd")" aria-label="Hasta" required />
+        <button type="submit" class="btn @(esRango ? "btn-warning text-dark fw-bold" : "btn-outline-light border-secondary")">Aplicar</button>
+    </form>
+
+    <span class="etiqueta-rango ms-xl-auto">Mostrando <b>@Model.SucursalNombre</b> · <b>@Model.Etiqueta</b></span>
+</div>

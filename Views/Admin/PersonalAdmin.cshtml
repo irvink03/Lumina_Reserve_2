@@ -1,0 +1,190 @@
+@model Lumina_Reserve_2.Models.PersonalViewModel
+@{
+    ViewData["Title"] = "Personal";
+    var barberos = Model.Barberos;
+    var activos = barberos.Count(b => b.Activo);
+    string Hora(TimeSpan? t) => t.HasValue ? Lumina_Reserve_2.Services.Reloj.Hoy.Add(t.Value).ToString("HH:mm") : "--:--";
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="admin container-xxl py-4 px-3 px-lg-4">
+    <partial name="_AdminNav" model="@("PersonalAdmin")" />
+
+    <div class="row g-3">
+        <!-- Alta / edición de barbero (sp_GestionarEmpleado) -->
+        <div class="col-12 col-xl-4">
+            <div class="admin-card">
+                <h2 class="mb-3" id="tituloBarbero">Nuevo barbero</h2>
+                <form asp-action="GuardarBarbero" method="post" class="form-admin" id="formBarbero">
+                    <input type="hidden" name="empleadoId" id="empleadoId" value="" />
+
+                    <div class="mb-3">
+                        <label for="nombre" class="d-block">Nombre completo</label>
+                        <input id="nombre" name="nombre" class="form-control form-dark-control" required minlength="2" maxlength="100" placeholder="Ej. Carlos Méndez" />
+                    </div>
+
+                    <div class="mb-3" id="grupoCorreo">
+                        <label for="correo" class="d-block">Correo</label>
+                        <input id="correo" name="correo" type="email" class="form-control form-dark-control" maxlength="100" required placeholder="carlos@luminareserve.com" />
+                        <small style="color: var(--a-ink-3); font-size: .75rem;">Si el correo ya tiene cuenta, se usa esa misma cuenta.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="telefono" class="d-block">Teléfono</label>
+                        <input id="telefono" name="telefono" type="tel" class="form-control form-dark-control" maxlength="20" placeholder="9611234567" />
+                    </div>
+
+                    <div class="mb-3" id="grupoPassword">
+                        <label for="password" class="d-block">Contraseña inicial</label>
+                        <input id="password" name="password" type="password" class="form-control form-dark-control" minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+                        <small style="color: var(--a-ink-3); font-size: .75rem;">Solo se pide para cuentas nuevas.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sucursalId" class="d-block">Sucursal</label>
+                        <select id="sucursalId" name="sucursalId" class="form-select form-dark-control" required>
+                            @foreach (var s in Model.Sucursales)
+                            {
+                                <option value="@s.SucursalId">@s.Nombre</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="especialidad" class="d-block">Especialidad</label>
+                        <input id="especialidad" name="especialidad" class="form-control form-dark-control" maxlength="100" placeholder="Ej. Fades y diseños" />
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <label for="horarioInicio" class="d-block">Entrada</label>
+                            <input id="horarioInicio" name="horarioInicio" type="time" class="form-control form-dark-control" value="10:00" required style="color-scheme: dark;" />
+                        </div>
+                        <div class="col-6">
+                            <label for="horarioFin" class="d-block">Salida</label>
+                            <input id="horarioFin" name="horarioFin" type="time" class="form-control form-dark-control" value="20:00" required style="color-scheme: dark;" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-gold-fill w-100 py-2" id="btnBarbero">Registrar barbero</button>
+                    <button type="button" class="btn btn-dark-outline w-100 fw-bold mt-2 py-2" onclick="nuevoBarbero()">Limpiar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista -->
+        <div class="col-12 col-xl-8">
+            <div class="admin-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-2">
+                    <h2>Barberos</h2>
+                    <span class="sub">@activos activos de @barberos.Count · un barbero inactivo deja de aparecer al agendar</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Barbero</th>
+                                <th>Sucursal</th>
+                                <th>Horario</th>
+                                <th class="num">Próximas</th>
+                                <th class="num">Completadas</th>
+                                <th>Estado</th>
+                                <th class="text-end">Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (barberos.Any())
+                            {
+                                foreach (var b in barberos)
+                                {
+                                    <tr class="@(b.Activo ? "" : "inactivo")">
+                                        <td>
+                                            <b>@b.NombreBarbero</b>
+                                            <div class="tenue">@(b.Especialidad ?? "Sin especialidad")</div>
+                                            <div class="tenue">@b.Correo@(string.IsNullOrEmpty(b.Telefono) ? "" : $" · {b.Telefono}")</div>
+                                        </td>
+                                        <td><span class="badge border border-warning text-warning">@b.SucursalAsignada</span></td>
+                                        <td style="white-space: nowrap;">@Hora(b.HorarioInicio) – @Hora(b.HorarioFin)</td>
+                                        <td class="num">@b.CitasProximas</td>
+                                        <td class="num">@b.CitasCompletadas</td>
+                                        <td>
+                                            <form asp-action="CambiarEstadoEmpleado" method="post"
+                                                  data-confirmar="@(b.Activo && b.CitasProximas > 0 ? $"{b.NombreBarbero} tiene {b.CitasProximas} cita(s) próxima(s). ¿Desactivarlo de todos modos?" : "")"
+                                                  onsubmit="return !this.dataset.confirmar || confirm(this.dataset.confirmar);">
+                                                <input type="hidden" name="empleadoId" value="@b.EmpleadoId" />
+                                                <input type="hidden" name="activo" value="@((!b.Activo).ToString().ToLower())" />
+                                                <button type="submit" class="switch-estado @(b.Activo ? "on" : "")" title="@(b.Activo ? "Desactivar barbero" : "Activar barbero")">
+                                                    <span class="punto"></span> @(b.Activo ? "Activo" : "Inactivo")
+                                                </button>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <div class="acciones">
+                                                <button type="button" class="btn-accion btn-editar-barbero" title="Editar" aria-label="Editar @b.NombreBarbero"
+                                                        data-id="@b.EmpleadoId" data-nombre="@b.NombreBarbero" data-correo="@b.Correo"
+                                                        data-telefono="@b.Telefono" data-sucursal="@b.SucursalId" data-especialidad="@b.Especialidad"
+                                                        data-inicio="@Hora(b.HorarioInicio)" data-fin="@Hora(b.HorarioFin)">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="7" class="vacio">No hay barberos registrados.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const $ = id => document.getElementById(id);
+
+        document.querySelectorAll('.btn-editar-barbero').forEach(btn => btn.addEventListener('click', function () {
+            const d = this.dataset;
+            $('tituloBarbero').innerText = 'Editar barbero';
+            $('empleadoId').value = d.id;
+            $('nombre').value = d.nombre;
+            $('correo').value = d.correo;
+            $('correo').readOnly = true;          // el correo identifica la cuenta; no se edita aquí
+            $('correo').required = false;
+            $('grupoPassword').classList.add('d-none');
+            $('password').value = '';
+            $('telefono').value = d.telefono || '';
+            $('sucursalId').value = d.sucursal;
+            $('especialidad').value = d.especialidad || '';
+            $('horarioInicio').value = d.inicio !== '--:--' ? d.inicio : '10:00';
+            $('horarioFin').value = d.fin !== '--:--' ? d.fin : '20:00';
+            $('btnBarbero').innerText = 'Guardar cambios';
+            $('nombre').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }));
+
+        function nuevoBarbero() {
+            $('formBarbero').reset();
+            $('tituloBarbero').innerText = 'Nuevo barbero';
+            $('empleadoId').value = '';
+            $('correo').readOnly = false;
+            $('correo').required = true;
+            $('grupoPassword').classList.remove('d-none');
+            $('btnBarbero').innerText = 'Registrar barbero';
+        }
+
+        $('formBarbero').addEventListener('submit', function (e) {
+            if ($('horarioInicio').value >= $('horarioFin').value) {
+                e.preventDefault();
+                alert('La hora de salida debe ser posterior a la de entrada.');
+            }
+        });
+    </script>
+}

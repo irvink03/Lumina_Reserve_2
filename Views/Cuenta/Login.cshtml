@@ -8,6 +8,11 @@
             <div class="p-4 p-md-5 shadow-lg" style="background-color: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 16px;">
                 <h3 class="text-center mb-4 fw-bold" style="color: #d4af37;">Iniciar Sesión</h3>
 
+                @if (TempData["Exito"] != null)
+                {
+                    <div class="alert alert-success py-2 mb-3">@TempData["Exito"]</div>
+                }
+
                 @if (ViewBag.Error != null)
                 {
                     <div class="alert alert-danger py-2 mb-3">@ViewBag.Error</div>
@@ -16,17 +21,20 @@
                 <form asp-action="Login" method="post">
                     <div class="mb-3">
                         <label class="form-label text-white-50 small">Correo Electrónico</label>
-                        <input type="email" name="correo" class="form-control bg-dark text-white border-secondary" placeholder="tucorreo@email.com" required />
+                        <input type="email" name="correo" value="@ViewBag.Correo" autocomplete="username" class="form-control bg-dark text-white border-secondary" placeholder="tucorreo@email.com" required />
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-white-50 small">Contraseña</label>
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <label class="form-label text-white-50 small">Contraseña</label>
+                            <a asp-action="RecuperarPassword" class="small text-decoration-none" style="color: #d4af37;">¿Olvidaste tu contraseña?</a>
+                        </div>
                         <input type="password" name="password" class="form-control bg-dark text-white border-secondary" placeholder="********" required />
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label text-white-50 small">Código de Verificación (Telegram Bot)</label>
-                        <input type="text" name="codigoVerificacion" class="form-control bg-dark text-white border-secondary" placeholder="Ej. 849201" />
+                        <input type="text" name="codigoVerificacion" class="form-control bg-dark text-white border-secondary" placeholder="Ej. 849201" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required />
                         <small class="text-white-50 d-block mt-1" style="font-size: 0.75rem;">
                             Solicita tu código temporal enviando tu correo a nuestro bot de Telegram (<strong style="color: #d4af37;">@@LuminaReserva_bot</strong>).
                         </small>

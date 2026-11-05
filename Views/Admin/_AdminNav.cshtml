@@ -1,0 +1,43 @@
+@model string
+@{
+    var items = new[]
+    {
+        ("Dashboard", "fa-chart-line", "Dashboard"),
+        ("Gastos", "fa-receipt", "Gastos"),
+        ("CatalogoServicios", "fa-scissors", "Catálogo"),
+        ("PersonalAdmin", "fa-users", "Personal")
+    };
+}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
+    <div>
+        <h1 class="h3 fw-bold mb-1">Panel de administración</h1>
+        <p class="m-0" style="color: var(--a-ink-3);">Lumina Reserve · @Lumina_Reserve_2.Services.Reloj.Ahora.ToString("dddd dd 'de' MMMM, yyyy", new System.Globalization.CultureInfo("es-MX"))</p>
+    </div>
+</div>
+<nav class="admin-nav mt-3" aria-label="Secciones del panel">
+    @foreach (var (accion, icono, texto) in items)
+    {
+        <a asp-controller="Admin" asp-action="@accion" class="@(Model == accion ? "activo" : "")" aria-current="@(Model == accion ? "page" : null)">
+            <i class="fa-solid @icono"></i> @texto
+        </a>
+    }
+</nav>
+
+@if (TempData["ExitoAdmin"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-1"></i> @TempData["ExitoAdmin"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+@if (TempData["ErrorAdmin"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i> @TempData["ErrorAdmin"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+@if (ViewBag.ErrorAdmin != null)
+{
+    <div class="alert alert-danger" role="alert"><i class="fa-solid fa-database me-1"></i> @ViewBag.ErrorAdmin</div>
+}

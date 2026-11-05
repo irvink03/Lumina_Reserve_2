@@ -1,13 +1,21 @@
 @model IEnumerable<Lumina_Reserve_2.Models.Cita>
 @{
     ViewData["Title"] = "Historial de Citas";
+
+    string ClaseEstado(string? estado) => estado switch
+    {
+        "Completada" => "bg-success",
+        "Confirmada" => "bg-info text-dark",
+        "Cancelada" => "bg-danger",
+        _ => "bg-warning text-dark"
+    };
 }
 
 <div class="container mt-5 pt-3">
     <h2 class="fw-bold text-white mb-4">MI <span class="brand-gold">HISTORIAL</span></h2>
-    
+
     <div class="dark-card p-4">
-        @if(Model != null && Model.Any())
+        @if (Model != null && Model.Any())
         {
             <div class="table-responsive">
                 <table class="table table-dark table-hover align-middle mb-0">
@@ -16,20 +24,34 @@
                             <th class="py-3">Fecha y Hora</th>
                             <th class="py-3">Sucursal</th>
                             <th class="py-3">Barbero</th>
+                            <th class="py-3">Servicios</th>
+                            <th class="py-3 text-end">Total</th>
                             <th class="py-3">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach(var cita in Model)
+                        @foreach (var cita in Model)
                         {
+                            var total = cita.Cortes.Sum(c => c.Precio);
+                            var pago = cita.Pagos.OrderByDescending(p => p.PagoId).FirstOrDefault();
                             <tr style="border-bottom: 1px solid #262626;">
                                 <td class="py-3 fw-bold">@cita.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td class="py-3">@cita.Sucursal?.Nombre</td>
-                                <td class="py-3 text-white-50">@(cita.Empleado?.Usuario?.Nombre ?? "Cualquier barbero disponible")</td>
+                                <td class="py-3 text-white-50">@(cita.Empleado?.Usuario?.Nombre ?? "Por asignar")</td>
+                                <td class="py-3 small">@(cita.Cortes.Any() ? string.Join(", ", cita.Cortes.Select(c => c.Nombre)) : "--")</td>
+                                <td class="py-3 text-end">
+                                    @total.ToString("C")
+                                    @if (pago != null)
+                                    {
+                                        <small class="d-block text-white-50">@pago.MetodoPago</small>
+                                    }
+                                </td>
                                 <td class="py-3">
-                                    <span class="badge @(cita.Estado == "Confirmada" ? "bg-success" : cita.Estado == "Cancelada" ? "bg-danger" : "bg-warning text-dark")">
-                                        @cita.Estado
-                                    </span>
+                                    <span class="badge @ClaseEstado(cita.Estado)">@cita.Estado</span>
+                                    @if (cita.Estado == "Completada" && !cita.Resenas.Any())
+                                    {
+                                        <a asp-controller="Resenas" asp-action="Resenas" class="d-block small brand-gold mt-1 text-decoration-none">Calificar</a>
+                                    }
                                 </td>
                             </tr>
                         }
